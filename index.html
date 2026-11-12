@@ -66,6 +66,9 @@
     .auth-error { min-height: 17px; color: var(--red-ink); font-size: 10px; line-height: 1.5; }
     .auth-submit { width: 100%; min-height: 43px; margin-top: 3px; }
     .auth-notice { margin-top: 18px; padding: 11px 12px; border-left: 3px solid #d4b75d; background: #fff9e9; color: #735a26; font-size: 10px; line-height: 1.55; }
+    .auth-demo { display: grid; gap: 7px; margin-top: 14px; }
+    .auth-demo .button { width: 100%; }
+    .auth-demo-note { margin: 0; color: #87928c; font-size: 9px; line-height: 1.5; text-align: center; }
     .auth-footer { margin-top: 22px; color: #929d96; font-size: 9px; line-height: 1.6; }
     .auth-setup-fields { display: grid; gap: 14px; }
     .logout-button { margin-left: auto; padding: 6px 8px; border: 1px solid rgba(255,255,255,.2); border-radius: 4px; background: transparent; color: #d5e0d9; font-size: 10px; }
@@ -338,6 +341,7 @@
     const AUTH_KEY = 'giapesa-auth-user-v1';
     const AUTH_USERS_KEY = 'giapesa-auth-users-v1';
     const AUTH_SESSION_KEY = 'giapesa-auth-session-v1';
+    const DEMO_ACCOUNT = { username: 'Invitado', usernameKey: 'demo', role: 'demo' };
     const ESCROW_ABI = [
       'function token() view returns (address)',
       'function createAgreement(bytes32 agreementKey,address subcontractor,uint256 totalAmount)',
@@ -414,10 +418,13 @@
     }
     function updateWalletDisplay() {
       const button = document.getElementById('wallet-button');
+      const demoMode = authRecord?.role === 'demo';
       const address = chain.account ? `${chain.account.slice(0, 6)}…${chain.account.slice(-4)}` : 'Conectar MetaMask';
-      button.querySelector('span:last-child').textContent = address;
+      button.querySelector('span:last-child').textContent = demoMode ? 'Modo demo local' : address;
+      button.disabled = demoMode;
+      button.title = demoMode ? 'Wallet deshabilitada en modo demostración' : 'Conectar wallet compatible con Ethereum';
       document.getElementById('network-name').textContent = chain.chainId ? `EVM · ${chain.chainId}` : 'Red de prueba';
-      document.getElementById('network-detail').innerHTML = chain.account ? `${address}<br>Escrow ${chain.escrow ? 'verificado' : 'no conectado'}` : 'Conecta una wallet para empezar<br>Contrato sin configurar';
+      document.getElementById('network-detail').innerHTML = demoMode ? 'Modo de prueba local<br>Sin transacciones reales' : chain.account ? `${address}<br>Escrow ${chain.escrow ? 'verificado' : 'no conectado'}` : 'Conecta una wallet para empezar<br>Contrato sin configurar';
     }
     function requireEvm() {
       if (!chain.escrow || !chain.token) throw new Error('Configura el contrato y conecta MetaMask desde Blockchain antes de enviar transacciones.');
@@ -431,6 +438,7 @@
       state.logs[0].txHash = txHash;
     }
     async function connectWallet() {
+      if (authRecord?.role === 'demo') throw new Error('La conexión blockchain está deshabilitada en modo demostración.');
       if (!window.ethereum) throw new Error('No se detectó una wallet EVM. Instala MetaMask y vuelve a cargar la página.');
       if (!window.ethers) throw new Error('No se pudo cargar ethers.js. Comprueba la conexión a internet y recarga.');
       if (!ethers.isAddress(web3Config.escrowAddress) || !ethers.isAddress(web3Config.tokenAddress)) {
@@ -477,13 +485,18 @@
       const displayName = authRecord.companyName || authRecord.username;
       document.getElementById('account-name').textContent = displayName;
       document.getElementById('account-avatar').textContent = displayName.slice(0, 2).toUpperCase();
-      document.querySelector('.user-role').textContent = authRecord.role === 'subcontractor' ? 'Subcontratista' : 'Administrador';
+      document.querySelector('.user-role').textContent = authRecord.role === 'subcontractor' ? 'Subcontratista' : authRecord.role === 'demo' ? 'Modo demostración' : 'Administrador';
       updateWalletDisplay();
       render();
     }
     function renderAuthScreen(error = '') {
       const wrap = document.getElementById('auth-form-wrap');
-      wrap.innerHTML = `<div class="auth-overline">GIAPESA S.A.C. · Acceso al sistema</div><h2>Iniciar sesión</h2><p class="auth-intro">Ingresa el usuario y la contraseña que te entregó GIAPESA S.A.C.</p><form id="auth-form"><div class="auth-fields"><div class="auth-field"><label for="auth-username">Usuario</label><input id="auth-username" name="username" autocomplete="username" maxlength="40" required placeholder="Tu usuario"></div><div class="auth-field"><label for="auth-password">Contraseña</label><div class="auth-password"><input id="auth-password" name="password" type="password" autocomplete="current-password" maxlength="128" required placeholder="Tu contraseña"><button class="auth-show-password" type="button" id="toggle-password">Mostrar</button></div></div><div class="auth-error" id="auth-error" role="alert">${esc(error)}</div><button class="button auth-submit" type="submit">Acceder al sistema</button></div></form><div class="auth-notice">Las credenciales las proporciona la empresa. Si aún no tienes usuario, solicítalo al área responsable de GIAPESA.</div><div class="auth-footer">Este prototipo valida cuentas guardadas en este navegador; el acceso corporativo compartido requiere un servidor de autenticación.</div>`;
+      wrap.innerHTML = `<div class="auth-overline">GIAPESA S.A.C. · Acceso al sistema</div><h2>Iniciar sesión</h2><p class="auth-intro">Ingresa el usuario y la contraseña que te entregó GIAPESA S.A.C.</p><form id="auth-form"><div class="auth-fields"><div class="auth-field"><label for="auth-username">Usuario</label><input id="auth-username" name="username" autocomplete="username" maxlength="40" required placeholder="Tu usuario"></div><div class="auth-field"><label for="auth-password">Contraseña</label><div class="auth-password"><input id="auth-password" name="password" type="password" autocomplete="current-password" maxlength="128" required placeholder="Tu contraseña"><button class="auth-show-password" type="button" id="toggle-password">Mostrar</button></div></div><div class="auth-error" id="auth-error" role="alert">${esc(error)}</div><button class="button auth-submit" type="submit">Acceder al sistema</button></div></form><div class="auth-demo"><button class="button secondary" type="button" id="demo-login">▤ Probar sistema en modo demo</button><p class="auth-demo-note">Acceso para pruebas con datos locales. No conecta wallets ni realiza transacciones reales.</p></div><div class="auth-notice">Las credenciales las proporciona la empresa. Si aún no tienes usuario, solicítalo al área responsable de GIAPESA.</div><div class="auth-footer">Este prototipo valida cuentas guardadas en este navegador; el acceso corporativo compartido requiere un servidor de autenticación.</div>`;
+      document.getElementById('demo-login').addEventListener('click', () => {
+        authRecord = DEMO_ACCOUNT;
+        enableAuthenticatedView();
+        showToast('Modo demostración: los cambios quedan en este navegador.');
+      });
       document.getElementById('toggle-password').addEventListener('click', event => {
         const input = document.getElementById('auth-password');
         input.type = input.type === 'password' ? 'text' : 'password';
@@ -521,7 +534,7 @@
       render();
       const sessionIdentity = sessionStorage.getItem(AUTH_SESSION_KEY);
       if (sessionIdentity) {
-        authRecord = sessionIdentity === 'active' ? legacyAuthRecord : authUsers.find(user => user.usernameKey === sessionIdentity);
+        authRecord = sessionIdentity === 'active' ? legacyAuthRecord : sessionIdentity === 'demo' ? DEMO_ACCOUNT : authUsers.find(user => user.usernameKey === sessionIdentity);
       }
       if (authRecord) enableAuthenticatedView();
       else {
