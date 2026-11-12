@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1027 769" role="img" aria-labelledby="title desc">
+  <title id="title">Inversiones Hegapesa</title>
+  <desc id="desc">Logo de construcción con edificios, camión volquete y cargador frontal.</desc>
+  <defs>
+    <radialGradient id="badge" cx="50%" cy="43%" r="58%">
+      <stop offset="65%" stop-color="#fff"/><stop offset="87%" stop-color="#f8fbff"/><stop offset="100%" stop-color="#8eb5ff"/>
+    </radialGradient>
+    <linearGradient id="blue" x2="0" y2="1"><stop stop-color="#0c3f9f"/><stop offset="1" stop-color="#07327f"/></linearGradient>
+    <linearGradient id="blueBuilding" x2="1" y2="1"><stop stop-color="#4b80e2"/><stop offset="1" stop-color="#164ba9"/></linearGradient>
+    <linearGradient id="redBuilding" x2="0" y2="1"><stop stop-color="#df777b"/><stop offset="1" stop-color="#913f49"/></linearGradient>
+    <filter id="letterShadow" x="-.15" y="-.2" width="1.3" height="1.5"><feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur"/><feOffset dy="16" dx="5" result="offset"/><feComponentTransfer><feFuncA type="linear" slope=".65"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="513.5" cy="384.5" r="510" fill="url(#badge)"/>
+  <text x="513" y="245" text-anchor="middle" fill="#073b98" font-family="Arial Narrow, Impact, sans-serif" font-size="68" font-weight="900" letter-spacing="18">INVERSIONES</text>
+  <text x="513" y="427" text-anchor="middle" fill="url(#blue)" stroke="#082b69" stroke-width="2" paint-order="stroke" font-family="Impact, Arial Narrow, sans-serif" font-size="171" font-weight="900" letter-spacing="-5" filter="url(#letterShadow)">HEGAPESA</text>
+  <g stroke="#d5d9dd" stroke-width="3">
+    <path d="M340 740V604l42-26 48 22v140Z" fill="#f5f6f7"/>
+    <path d="M431 740V514l62-31 70 23v234Z" fill="url(#blueBuilding)" stroke="#3668bc"/>
+    <path d="M563 740V611l48-25 53 31v123Z" fill="url(#redBuilding)" stroke="#a9535d"/>
+  </g>
+  <g fill="#f8fbff">
+    <path d="M356 606h16v13h-16zm0 31h16v13h-16zm0 31h16v13h-16zm0 31h16v13h-16z"/>
+    <path d="M448 526h14v15h-14zm30-10h14v15h-14zm-30 43h14v15h-14zm30-10h14v15h-14zm-30 43h14v15h-14zm30-10h14v15h-14zm-30 43h14v15h-14zm30-10h14v15h-14zm-30 43h14v15h-14zm30-10h14v15h-14zm-30 43h14v15h-14zm30-10h14v15h-14z"/>
+    <path d="M594 625h13v13h-13zm25 14h13v13h-13zm-25 17h13v13h-13zm25 14h13v13h-13zm-25 17h13v13h-13zm25 14h13v13h-13z"/>
+  </g>
+  <g stroke="#26313a" stroke-width="6" stroke-linejoin="round">
+    <path fill="#ffca00" d="M74 695h66l18-62 48-5 25 61h27v50H75Z"/>
+    <path fill="#ffca00" d="M187 642l24-91 67-8-28 122-34 25Z"/>
+    <path fill="#f2f4f4" d="M91 642l16-30h42v40H91Z"/>
+    <path fill="#ffca00" d="M209 550l27-19 42-3-7 18-51 8Z"/>
+    <circle cx="114" cy="737" r="20" fill="#15191b"/><circle cx="114" cy="737" r="8" fill="#f5f5ef"/>
+    <circle cx="228" cy="737" r="19" fill="#15191b"/><circle cx="228" cy="737" r="8" fill="#f5f5ef"/>
+    <circle cx="281" cy="733" r="15" fill="#15191b"/><circle cx="281" cy="733" r="6" fill="#f5f5ef"/>
+  </g>
+  <g stroke="#29333a" stroke-width="6" stroke-linejoin="round">
+    <path fill="#ffc900" d="M702 690l23-72 27-9 21 18 42-1 35 52 47 15v31H713Z"/>
+    <path fill="#ffca00" d="M707 633l19-32 19 5-12 30-19 12Z"/>
+    <path fill="#ffd000" d="M851 696l49-27 30 18 25 12 23 5-5 18-78 3-37-8Z"/>
+    <circle cx="761" cy="737" r="19" fill="#15191b"/><circle cx="761" cy="737" r="8" fill="#f3f4ee"/>
+    <circle cx="817" cy="737" r="19" fill="#15191b"/><circle cx="817" cy="737" r="8" fill="#f3f4ee"/>
+    <circle cx="872" cy="737" r="17" fill="#15191b"/><circle cx="872" cy="737" r="7" fill="#f3f4ee"/>
+  </g>
+  <path d="M72 741h883v25H72z" fill="#5b9c3d"/>
+</svg>

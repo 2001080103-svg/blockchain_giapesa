@@ -42,7 +42,7 @@
     .auth-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: .46; }
     .auth-story::after { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,44,34,.08) 8%, rgba(12,39,30,.35) 47%, rgba(12,39,30,.96) 100%); content: ''; }
     .auth-brand { position: absolute; z-index: 1; top: 37px; left: clamp(28px, 6vw, 88px); display: flex; align-items: center; gap: 11px; }
-    .auth-brand .brand-mark { width: 39px; height: 39px; font-size: 19px; }
+    .auth-brand .brand-mark { width: 66px; height: 50px; }
     .auth-brand .brand-name { font-size: 17px; }
     .auth-copy { position: relative; z-index: 1; width: min(590px, 100%); padding-bottom: 12px; }
     .auth-kicker { color: #d3ef76; font: 700 10px 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; }
@@ -75,7 +75,7 @@
     .logout-button:hover { background: rgba(255,255,255,.1); color: white; }
     .sidebar { display: flex; flex-direction: column; padding: 26px 16px 18px; background: #173c31; color: #f4f6f2; }
     .brand { display: flex; align-items: center; gap: 11px; padding: 2px 10px 28px; }
-    .brand-mark { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 11px 11px 11px 3px; background: var(--lime); color: #18392e; font: 800 17px 'Manrope', sans-serif; }
+    .brand-mark { display: block; flex: 0 0 58px; width: 58px; height: 44px; object-fit: contain; }
     .brand-name { font: 800 17px 'Manrope', sans-serif; letter-spacing: 0; }
     .brand-sub { margin-top: 2px; color: #a7bdb2; font-size: 10px; letter-spacing: .5px; text-transform: uppercase; }
     .nav-label { padding: 0 11px 9px; color: #9eb4a9; font-size: 10px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; }
@@ -259,6 +259,7 @@
       .auth-screen { grid-template-columns: 1fr; }
       .auth-story { min-height: 270px; padding: 35px 25px 24px; }
       .auth-brand { top: 20px; left: 25px; }
+      .auth-brand .brand-mark { width: 62px; height: 47px; }
       .auth-copy { padding-top: 86px; }
       .auth-copy h1 { font-size: 29px; }
       .auth-points { gap: 6px; margin-top: 14px; }
@@ -297,14 +298,14 @@
   <div class="auth-screen" id="auth-screen">
     <section class="auth-story" aria-label="INVERSIONES HEGIAPESA S.A.C.">
       <img class="auth-photo" src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=85" alt="Obra de construcción en ejecución">
-      <div class="auth-brand"><div class="brand-mark">G</div><div><div class="brand-name">INVERSIONES HEGIAPESA S.A.C.</div><div class="brand-sub">Contratos verificables</div></div></div>
+      <div class="auth-brand"><img class="brand-mark" src="assets/logo-hegapesa.svg" alt="Logo de Inversiones Hegapesa"><div><div class="brand-name">INVERSIONES HEGIAPESA S.A.C.</div><div class="brand-sub">Contratos verificables</div></div></div>
       <div class="auth-copy"><div class="auth-kicker">Plataforma de control contractual</div><h1>Obra clara. Acuerdos bajo control.</h1><p>Accede al seguimiento de subcontratos, hitos y evidencias de obra.</p><div class="auth-points"><div class="auth-point"><span>◈</span> Escrow</div><div class="auth-point"><span>✓</span> Aprobación 2 de 3</div><div class="auth-point"><span>⌑</span> Evidencia SHA-256</div></div></div>
     </section>
     <section class="auth-side"><div class="auth-form-wrap" id="auth-form-wrap"></div></section>
   </div>
   <div class="shell">
     <aside class="sidebar">
-      <div class="brand"><div class="brand-mark">G</div><div><div class="brand-name">INVERSIONES HEGIAPESA S.A.C.</div><div class="brand-sub">Contratos verificables</div></div></div>
+      <div class="brand"><img class="brand-mark" src="assets/logo-hegapesa.svg" alt="Logo de Inversiones Hegapesa"><div><div class="brand-name">INVERSIONES HEGIAPESA S.A.C.</div><div class="brand-sub">Contratos verificables</div></div></div>
       <div class="nav-label">Espacio de trabajo</div>
       <nav class="nav" aria-label="Navegación principal">
         <button class="active" data-view="overview"><span class="nav-glyph">◫</span>Resumen</button>
