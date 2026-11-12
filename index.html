@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f6f2">
+  <title>GIAPESA S.A.C. | Control de contratos</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+    :root {
+      color-scheme: light;
+      --ink: #172722;
+      --muted: #74817b;
+      --paper: #f4f6f2;
+      --white: #fff;
+      --line: #e4e9e4;
+      --green: #164e3d;
+      --green-2: #2a765b;
+      --lime: #d3ef76;
+      --blue: #dcebf7;
+      --blue-ink: #2d6485;
+      --amber: #f5e5bb;
+      --amber-ink: #896219;
+      --red: #f8dfdb;
+      --red-ink: #a4473d;
+      --shadow: 0 16px 40px rgba(24, 44, 35, .08);
+      font-family: 'DM Sans', 'Segoe UI', sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; background: var(--paper); color: var(--ink); }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .shell { display: none; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; }
+    body.authenticated .shell { display: grid; }
+    .auth-screen { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(410px, .95fr); min-height: 100vh; background: white; }
+    body.authenticated .auth-screen { display: none; }
+    .auth-story { position: relative; display: flex; min-height: 100vh; align-items: flex-end; padding: 46px clamp(28px, 6vw, 88px); overflow: hidden; background: #173c31; color: white; }
+    .auth-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: .46; }
+    .auth-story::after { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,44,34,.08) 8%, rgba(12,39,30,.35) 47%, rgba(12,39,30,.96) 100%); content: ''; }
+    .auth-brand { position: absolute; z-index: 1; top: 37px; left: clamp(28px, 6vw, 88px); display: flex; align-items: center; gap: 11px; }
+    .auth-brand .brand-mark { width: 39px; height: 39px; font-size: 19px; }
+    .auth-brand .brand-name { font-size: 17px; }
+    .auth-copy { position: relative; z-index: 1; width: min(590px, 100%); padding-bottom: 12px; }
+    .auth-kicker { color: #d3ef76; font: 700 10px 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; }
+    .auth-copy h1 { max-width: 530px; margin: 13px 0 11px; font: 700 clamp(30px, 3.2vw, 48px) 'Manrope', sans-serif; line-height: 1.12; }
+    .auth-copy > p { max-width: 430px; margin: 0; color: #d4dfd8; font-size: 13px; line-height: 1.65; }
+    .auth-points { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 23px; }
+    .auth-point { display: inline-flex; align-items: center; gap: 7px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.25); border-radius: 4px; background: rgba(15,48,37,.55); color: #eff5ef; font-size: 10px; }
+    .auth-point span { color: #d3ef76; }
+    .auth-side { display: grid; place-items: center; padding: 40px clamp(25px, 6vw, 86px); background: #fbfcfa; }
+    .auth-form-wrap { width: min(390px, 100%); }
+    .auth-overline { color: var(--green-2); font: 700 10px 'Space Mono', monospace; letter-spacing: .6px; text-transform: uppercase; }
+    .auth-form-wrap h2 { margin: 10px 0 7px; font: 700 25px 'Manrope', sans-serif; }
+    .auth-intro { margin: 0 0 25px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .auth-fields { display: grid; gap: 14px; }
+    .auth-field { display: grid; gap: 7px; }
+    .auth-field label { color: #47574e; font-size: 11px; font-weight: 700; }
+    .auth-field input { width: 100%; height: 43px; padding: 0 12px; border: 1px solid #dfe5df; border-radius: 5px; background: white; color: var(--ink); font-size: 12px; }
+    .auth-password { position: relative; }
+    .auth-password input { padding-right: 68px; }
+    .auth-show-password { position: absolute; top: 0; right: 0; height: 43px; padding: 0 11px; border: 0; background: transparent; color: var(--green-2); font-size: 10px; font-weight: 700; }
+    .auth-error { min-height: 17px; color: var(--red-ink); font-size: 10px; line-height: 1.5; }
+    .auth-submit { width: 100%; min-height: 43px; margin-top: 3px; }
+    .auth-notice { margin-top: 18px; padding: 11px 12px; border-left: 3px solid #d4b75d; background: #fff9e9; color: #735a26; font-size: 10px; line-height: 1.55; }
+    .auth-footer { margin-top: 22px; color: #929d96; font-size: 9px; line-height: 1.6; }
+    .auth-setup-fields { display: grid; gap: 14px; }
+    .logout-button { margin-left: auto; padding: 6px 8px; border: 1px solid rgba(255,255,255,.2); border-radius: 4px; background: transparent; color: #d5e0d9; font-size: 10px; }
+    .logout-button:hover { background: rgba(255,255,255,.1); color: white; }
+    .sidebar { display: flex; flex-direction: column; padding: 26px 16px 18px; background: #173c31; color: #f4f6f2; }
+    .brand { display: flex; align-items: center; gap: 11px; padding: 2px 10px 28px; }
+    .brand-mark { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 11px 11px 11px 3px; background: var(--lime); color: #18392e; font: 800 17px 'Manrope', sans-serif; }
+    .brand-name { font: 800 17px 'Manrope', sans-serif; letter-spacing: 0; }
+    .brand-sub { margin-top: 2px; color: #a7bdb2; font-size: 10px; letter-spacing: .5px; text-transform: uppercase; }
+    .nav-label { padding: 0 11px 9px; color: #9eb4a9; font-size: 10px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; }
+    .nav { display: grid; gap: 4px; }
+    .nav button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 12px; border: 0; border-radius: 7px; background: transparent; color: #d5e0d9; text-align: left; font-size: 13px; transition: background .18s, color .18s; }
+    .nav button:hover { background: rgba(255,255,255,.09); }
+    .nav button.active { background: #f4f6f2; color: var(--green); font-weight: 700; }
+    .nav-glyph { display: grid; place-items: center; width: 20px; font-size: 17px; line-height: 1; }
+    .nav-count { margin-left: auto; padding: 2px 7px; border-radius: 10px; background: rgba(255,255,255,.13); font: 11px 'Space Mono', monospace; }
+    .nav button.active .nav-count { background: #e7eee8; }
+    .sidebar-spacer { flex: 1; min-height: 30px; }
+    .network { margin: 0 4px 14px; padding: 13px; border: 1px solid rgba(255,255,255,.16); border-radius: 7px; background: rgba(255,255,255,.045); }
+    .network-top { display: flex; align-items: center; justify-content: space-between; font-size: 11px; }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #b7dc62; box-shadow: 0 0 0 3px rgba(183,220,98,.12); }
+    .network p { margin: 8px 0 0; color: #a7bdb2; font-size: 10px; line-height: 1.5; }
+    .user-chip { display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid rgba(255,255,255,.14); }
+    .avatar { display: grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; border-radius: 50%; background: #d9e8d7; color: var(--green); font-size: 11px; font-weight: 700; }
+    .user-name { font-size: 12px; font-weight: 700; }
+    .user-role { margin-top: 2px; color: #a7bdb2; font-size: 10px; }
+    .main { min-width: 0; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; min-height: 74px; padding: 0 38px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.75); }
+    .crumb { color: var(--muted); font-size: 12px; }
+    .crumb strong { color: var(--ink); font-weight: 600; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .icon-button { position: relative; display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 7px; background: white; color: #53625a; font-size: 16px; }
+    .icon-button:hover { border-color: #b5c5b9; background: #f7faf6; }
+    .notification-dot { position: absolute; top: 7px; right: 7px; width: 6px; height: 6px; border-radius: 50%; background: #d66b51; }
+    .connection { display: flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid #dfe8de; border-radius: 7px; background: #f7faf5; color: #3d634d; font-size: 11px; font-weight: 600; }
+    .connection .live-dot { width: 6px; height: 6px; }
+    .content { width: min(1440px, 100%); margin: 0 auto; padding: 30px 38px 55px; }
+    .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+    .eyebrow { margin-bottom: 7px; color: var(--green-2); font: 700 10px 'Space Mono', monospace; letter-spacing: .5px; text-transform: uppercase; }
+    h1 { margin: 0; font: 700 27px 'Manrope', sans-serif; letter-spacing: 0; }
+    .subtitle { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 38px; padding: 0 14px; border: 1px solid transparent; border-radius: 6px; background: var(--green); color: white; font-size: 12px; font-weight: 700; transition: background .18s, transform .18s; }
+    .button:hover { background: #236449; transform: translateY(-1px); }
+    .button.secondary { border-color: var(--line); background: white; color: #34443c; }
+    .button.secondary:hover { border-color: #b5c5b9; background: #fbfcfa; }
+    .button.small { min-height: 31px; padding: 0 10px; font-size: 11px; }
+    .button.danger { background: #a4473d; }
+    .button.lime { background: var(--lime); color: #203d2f; }
+    .button:disabled { cursor: not-allowed; opacity: .48; transform: none; }
+    .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin-bottom: 17px; }
+    .metric { position: relative; min-height: 123px; padding: 17px 18px; overflow: hidden; border: 1px solid var(--line); border-radius: 7px; background: var(--white); }
+    .metric::after { position: absolute; right: -14px; bottom: -27px; width: 81px; height: 81px; border: 1px solid #e8eee8; border-radius: 50%; content: ''; }
+    .metric-head { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 11px; }
+    .metric-mark { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 6px; background: #eff5ec; color: var(--green-2); font-size: 15px; }
+    .metric-value { margin-top: 11px; font: 700 25px 'Manrope', sans-serif; letter-spacing: 0; }
+    .metric-foot { display: flex; align-items: center; gap: 5px; margin-top: 3px; color: var(--muted); font-size: 10px; }
+    .positive { color: #41835c; font-weight: 700; }
+    .dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(280px, .9fr); gap: 15px; align-items: start; }
+    .panel { min-width: 0; border: 1px solid var(--line); border-radius: 7px; background: white; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 19px; border-bottom: 1px solid #edf0ec; }
+    .panel-title { font: 700 13px 'Manrope', sans-serif; }
+    .panel-note { margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .text-button { padding: 0; border: 0; background: transparent; color: var(--green-2); font-size: 11px; font-weight: 700; }
+    .table-wrap { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 11px 15px; color: #87928c; font: 700 9px 'Space Mono', monospace; letter-spacing: .3px; text-transform: uppercase; white-space: nowrap; }
+    td { padding: 12px 15px; border-top: 1px solid #f0f2ef; font-size: 11px; white-space: nowrap; }
+    .table-primary { color: #24352e; font-size: 11px; font-weight: 700; }
+    .table-secondary { margin-top: 4px; color: #8a958f; font-size: 10px; }
+    .status { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 4px; background: #edf5eb; color: #3f7550; font-size: 10px; font-weight: 700; white-space: nowrap; }
+    .status.pending { background: #fff3d9; color: var(--amber-ink); }
+    .status.review { background: var(--blue); color: var(--blue-ink); }
+    .status.paid { background: #e7f2ef; color: #347462; }
+    .status.draft { background: #eff1ef; color: #69756e; }
+    .status.dot::before { width: 5px; height: 5px; border-radius: 50%; background: currentColor; content: ''; }
+    .right-stack { display: grid; gap: 15px; }
+    .escrow-panel { padding: 18px 19px 16px; background: #174838; color: white; }
+    .escrow-panel .panel-head { padding: 0 0 16px; border-color: rgba(255,255,255,.16); }
+    .escrow-panel .panel-note { color: #adc3b7; }
+    .escrow-label { margin-top: 16px; color: #b6c9bf; font-size: 10px; }
+    .escrow-value { margin-top: 5px; font: 700 27px 'Manrope', sans-serif; }
+    .escrow-row { display: flex; justify-content: space-between; margin: 15px 0 13px; color: #c1d3c8; font-size: 10px; }
+    .progress { height: 5px; overflow: hidden; border-radius: 5px; background: rgba(255,255,255,.18); }
+    .progress span { display: block; width: 64%; height: 100%; border-radius: inherit; background: var(--lime); }
+    .escrow-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .escrow-actions .button.secondary { border-color: rgba(255,255,255,.28); background: transparent; color: white; }
+    .escrow-actions .button.lime { flex: 1; }
+    .activity-list { padding: 5px 18px 11px; }
+    .activity { display: grid; grid-template-columns: 24px 1fr auto; gap: 9px; align-items: start; padding: 12px 0; border-bottom: 1px solid #f0f2ef; }
+    .activity:last-child { border-bottom: 0; }
+    .activity-icon { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #f0f5eb; color: #4a7957; font-size: 11px; }
+    .activity-copy { font-size: 10px; line-height: 1.45; }
+    .activity-copy strong { font-weight: 700; }
+    .activity-time { color: #9aa39e; font: 9px 'Space Mono', monospace; }
+    .lower-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(260px, .8fr); gap: 15px; margin-top: 15px; }
+    .milestone-list { padding: 4px 18px 10px; }
+    .milestone { display: grid; grid-template-columns: 27px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 11px 0; border-bottom: 1px solid #f0f2ef; }
+    .milestone:last-child { border-bottom: 0; }
+    .milestone-step { display: grid; place-items: center; width: 25px; height: 25px; border: 1px solid #dce6db; border-radius: 50%; color: #477355; font: 10px 'Space Mono', monospace; }
+    .milestone-title { font-size: 10px; font-weight: 700; }
+    .milestone-meta { margin-top: 4px; color: var(--muted); font-size: 9px; }
+    .milestone-amount { font: 700 11px 'Space Mono', monospace; }
+    .assurance { padding: 17px 18px; }
+    .assurance-line { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f0f2ef; font-size: 10px; }
+    .assurance-line:last-child { border: 0; }
+    .assurance-line span:last-child { color: #40805b; font: 700 10px 'Space Mono', monospace; }
+    .page-section { display: grid; gap: 15px; }
+    .toolbar { display: flex; align-items: center; gap: 9px; }
+    .search { width: min(250px, 40vw); min-height: 36px; padding: 0 11px; border: 1px solid var(--line); border-radius: 6px; outline: 0; background: white; color: var(--ink); font-size: 11px; }
+    .search:focus, input:focus, select:focus, textarea:focus { border-color: #7ca28a; box-shadow: 0 0 0 3px rgba(68,125,87,.1); outline: 0; }
+    .section-summary { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 11px; }
+    .filter-select { min-height: 36px; padding: 0 30px 0 10px; border: 1px solid var(--line); border-radius: 6px; background: white; color: #53625a; font-size: 11px; }
+    .empty-state { padding: 36px 20px; color: var(--muted); text-align: center; font-size: 12px; }
+    .evidence-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .evidence-card { min-width: 0; padding: 15px; border: 1px solid var(--line); border-radius: 7px; background: white; }
+    .evidence-thumb { display: grid; place-items: center; height: 124px; margin-bottom: 13px; border-radius: 5px; background: linear-gradient(135deg, #dcece3, #edf2e8 50%, #d8e6e4); color: #456b55; font-size: 31px; }
+    .hash { overflow: hidden; margin-top: 9px; color: #61736b; font: 9px 'Space Mono', monospace; text-overflow: ellipsis; white-space: nowrap; }
+    .audit-row { display: grid; grid-template-columns: 110px minmax(0, 1fr) 135px; gap: 12px; align-items: center; padding: 13px 17px; border-bottom: 1px solid #f0f2ef; font-size: 10px; }
+    .audit-row:last-child { border-bottom: 0; }
+    .audit-time { color: #839089; font: 9px 'Space Mono', monospace; }
+    .audit-hash { overflow: hidden; color: #687a70; font: 9px 'Space Mono', monospace; text-overflow: ellipsis; white-space: nowrap; }
+    .security-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
+    .security-card { padding: 17px; border: 1px solid var(--line); border-radius: 7px; background: white; }
+    .security-card h3 { margin: 0 0 7px; font: 700 12px 'Manrope', sans-serif; }
+    .security-card p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .security-value { margin-top: 17px; font: 700 20px 'Space Mono', monospace; }
+    .security-foot { display: flex; align-items: center; gap: 6px; margin-top: 8px; color: #41835c; font-size: 10px; }
+    .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 15px 17px; border-bottom: 1px solid #f0f2ef; }
+    .setting-row:last-child { border-bottom: 0; }
+    .setting-name { font-size: 11px; font-weight: 700; }
+    .setting-desc { margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .switch { position: relative; width: 36px; height: 20px; flex: 0 0 36px; }
+    .switch input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .switch-track { position: absolute; inset: 0; border-radius: 12px; background: #c9d1cb; transition: background .2s; }
+    .switch-track::after { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: white; content: ''; transition: transform .2s; }
+    .switch input:checked + .switch-track { background: #3c815d; }
+    .switch input:checked + .switch-track::after { transform: translateX(16px); }
+    .switch input:focus-visible + .switch-track { outline: 3px solid #a6c5a5; }
+    .toast { position: fixed; right: 25px; bottom: 24px; z-index: 20; max-width: min(390px, calc(100vw - 32px)); padding: 12px 16px; border: 1px solid #dbe8da; border-radius: 6px; background: #173c31; box-shadow: var(--shadow); color: white; font-size: 12px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity .2s, transform .2s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    dialog { width: min(540px, calc(100vw - 28px)); max-height: min(88vh, 760px); padding: 0; overflow: auto; border: 1px solid #dfe6df; border-radius: 9px; background: white; box-shadow: 0 24px 70px rgba(20,40,30,.24); color: var(--ink); }
+    dialog::backdrop { background: rgba(16, 34, 27, .43); backdrop-filter: blur(2px); }
+    .dialog-head { display: flex; justify-content: space-between; gap: 15px; padding: 19px 21px 15px; border-bottom: 1px solid var(--line); }
+    .dialog-head h2 { margin: 0; font: 700 17px 'Manrope', sans-serif; }
+    .dialog-head p { margin: 5px 0 0; color: var(--muted); font-size: 10px; }
+    .close-dialog { width: 29px; height: 29px; border: 1px solid var(--line); border-radius: 5px; background: white; color: #5e6a63; font-size: 18px; }
+    .dialog-body { padding: 17px 21px 21px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    .field { display: grid; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { color: #4f5c55; font-size: 10px; font-weight: 700; }
+    .field input, .field select, .field textarea { width: 100%; min-height: 37px; padding: 8px 10px; border: 1px solid #dfe5df; border-radius: 5px; background: white; color: var(--ink); font-size: 11px; }
+    .field textarea { min-height: 70px; resize: vertical; }
+    .field-hint { color: #87928c; font-size: 9px; }
+    .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+    .approval-list { display: grid; gap: 8px; margin-top: 14px; }
+    .approval-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border: 1px solid var(--line); border-radius: 5px; font-size: 11px; }
+    .approval-item span:last-child { color: var(--muted); font-size: 10px; }
+    .approval-item.approved { border-color: #cae0c8; background: #f4faf2; }
+    .approval-summary { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding: 12px; border-radius: 5px; background: #f2f6f0; font-size: 11px; }
+    .prototype-note { padding: 10px 12px; border-left: 3px solid #d5b35a; background: #fff9e9; color: #765b22; font-size: 10px; line-height: 1.5; }
+    @keyframes rise { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+    .content > * { animation: rise .35s ease both; }
+    @media (max-width: 1100px) {
+      .shell { grid-template-columns: 205px minmax(0, 1fr); }
+      .content { padding-right: 24px; padding-left: 24px; }
+      .topbar { padding: 0 24px; }
+      .metric-grid { grid-template-columns: repeat(2, 1fr); }
+      .dashboard-grid { grid-template-columns: minmax(0, 1.4fr) minmax(250px, .9fr); }
+    }
+    @media (max-width: 780px) {
+      .shell { display: none; padding-bottom: 66px; }
+      body.authenticated .shell { display: block; }
+      .sidebar { position: fixed; z-index: 10; right: 0; bottom: 0; left: 0; display: block; height: 62px; padding: 0; box-shadow: 0 -3px 14px rgba(20,40,30,.12); }
+      .brand, .nav-label, .sidebar-spacer, .network, .user-chip { display: none; }
+      .nav { display: flex; justify-content: space-around; height: 62px; padding: 5px 4px; }
+      .nav button { flex: 1; flex-direction: column; justify-content: center; gap: 3px; min-width: 0; padding: 3px 1px; border-radius: 4px; color: #d5e0d9; font-size: 9px; text-align: center; }
+      .nav button.active { background: rgba(255,255,255,.13); color: var(--lime); }
+      .nav-glyph { font-size: 16px; }
+      .nav-count { display: none; }
+      .topbar { min-height: 60px; padding: 0 17px; }
+      .content { padding: 23px 16px 32px; }
+      .page-heading { align-items: flex-start; }
+      h1 { font-size: 23px; }
+      .connection { padding: 7px 8px; font-size: 10px; }
+      .dashboard-grid, .lower-grid { grid-template-columns: 1fr; }
+      .evidence-grid, .security-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .auth-screen { grid-template-columns: 1fr; }
+      .auth-story { min-height: 270px; padding: 35px 25px 24px; }
+      .auth-brand { top: 20px; left: 25px; }
+      .auth-copy { padding-top: 86px; }
+      .auth-copy h1 { font-size: 29px; }
+      .auth-points { gap: 6px; margin-top: 14px; }
+      .auth-point { padding: 6px 8px; font-size: 9px; }
+      .auth-side { padding: 32px 24px 44px; }
+    }
+    @media (max-width: 480px) {
+      .topbar { min-height: 55px; }
+      .crumb { font-size: 10px; }
+      .top-actions { gap: 6px; }
+      .connection { gap: 5px; font-size: 0; }
+      .connection .live-dot { width: 7px; height: 7px; }
+      .icon-button { width: 32px; height: 32px; }
+      .page-heading { flex-direction: column; align-items: stretch; gap: 14px; }
+      .page-heading > .button { align-self: flex-start; }
+      .metric-grid { gap: 8px; }
+      .metric { min-height: 111px; padding: 13px; }
+      .metric-value { font-size: 22px; }
+      .metric-head { font-size: 9px; }
+      .metric-foot { font-size: 9px; }
+      .panel-head { padding: 14px; }
+      th, td { padding-right: 11px; padding-left: 11px; }
+      .evidence-grid, .security-grid { grid-template-columns: 1fr; }
+      .audit-row { grid-template-columns: 80px minmax(0, 1fr); }
+      .audit-hash { grid-column: 2; }
+      .toolbar { flex-wrap: wrap; }
+      .search { flex: 1; width: auto; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      .dialog-body { padding: 15px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="auth-screen" id="auth-screen">
+    <section class="auth-story" aria-label="GIAPESA S.A.C.">
+      <img class="auth-photo" src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=85" alt="Obra de construcción en ejecución">
+      <div class="auth-brand"><div class="brand-mark">G</div><div><div class="brand-name">GIAPESA S.A.C.</div><div class="brand-sub">Contratos verificables</div></div></div>
+      <div class="auth-copy"><div class="auth-kicker">Plataforma de control contractual</div><h1>Obra clara. Acuerdos bajo control.</h1><p>Accede al seguimiento de subcontratos, hitos y evidencias de obra.</p><div class="auth-points"><div class="auth-point"><span>◈</span> Escrow</div><div class="auth-point"><span>✓</span> Aprobación 2 de 3</div><div class="auth-point"><span>⌑</span> Evidencia SHA-256</div></div></div>
+    </section>
+    <section class="auth-side"><div class="auth-form-wrap" id="auth-form-wrap"></div></section>
+  </div>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">G</div><div><div class="brand-name">GIAPESA S.A.C.</div><div class="brand-sub">Contratos verificables</div></div></div>
+      <div class="nav-label">Espacio de trabajo</div>
+      <nav class="nav" aria-label="Navegación principal">
+        <button class="active" data-view="overview"><span class="nav-glyph">◫</span>Resumen</button>
+        <button data-view="contracts"><span class="nav-glyph">▤</span>Contratos<span class="nav-count" id="contract-count">0</span></button>
+        <button data-view="milestones"><span class="nav-glyph">◷</span>Hitos<span class="nav-count" id="milestone-count">0</span></button>
+        <button data-view="evidence"><span class="nav-glyph">⌑</span>Evidencias</button>
+        <button data-view="audit"><span class="nav-glyph">⇄</span>Auditoría</button>
+        <button data-view="security"><span class="nav-glyph">⬡</span>Seguridad</button>
+        <button data-view="blockchain"><span class="nav-glyph">⛓</span>Blockchain</button>
+        <button data-view="notifications"><span class="nav-glyph">◉</span>Avisos</button>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="network"><div class="network-top"><span id="network-name">Red de prueba</span><span class="live-dot"></span></div><p id="network-detail">Conecta una wallet para empezar<br>Contrato sin configurar</p></div>
+      <div class="user-chip"><div class="avatar" id="account-avatar">MC</div><div><div class="user-name" id="account-name">Usuario</div><div class="user-role">Sesión local</div></div><button class="logout-button" id="logout-button">Salir</button></div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb">GIAPESA S.A.C. <span aria-hidden="true"> / </span> <strong id="breadcrumb">Resumen</strong></div>
+        <div class="top-actions">
+          <button class="icon-button" id="notification-button" aria-label="Abrir avisos" title="Avisos">♧<span class="notification-dot"></span></button>
+          <button class="connection" id="wallet-button" title="Conectar wallet compatible con Ethereum"><span class="live-dot"></span><span>Conectar MetaMask</span></button>
+        </div>
+      </header>
+      <div class="content" id="content"></div>
+    </main>
+  </div>
+  <dialog id="modal"><div id="modal-content"></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
+  <script>
+    const STORAGE_KEY = 'obra-clara-demo-v1';
+    const WEB3_CONFIG_KEY = 'giapesa-evm-config-v1';
+    const AUTH_KEY = 'giapesa-auth-user-v1';
+    const AUTH_SESSION_KEY = 'giapesa-auth-session-v1';
+    const ESCROW_ABI = [
+      'function token() view returns (address)',
+      'function createAgreement(bytes32 agreementKey,address subcontractor,uint256 totalAmount)',
+      'function createMilestone(bytes32 agreementKey,uint256 amount,string title,string condition) returns (uint256)',
+      'function deposit(bytes32 agreementKey,uint256 amount)',
+      'function submitEvidence(uint256 milestoneId,bytes32 evidenceHash)',
+      'function approveMilestone(uint256 milestoneId)',
+      'function milestones(uint256) view returns (bytes32 agreementKey,uint256 amount,uint8 approvals,uint8 votes,bool paid,bool exists,bytes32 evidenceHash)',
+      'event MilestoneCreated(uint256 indexed milestoneId,bytes32 indexed agreementKey,uint256 amount,string title,string condition)'
+    ];
+    const TOKEN_ABI = [
+      'function decimals() view returns (uint8)',
+      'function approve(address spender,uint256 amount) returns (bool)'
+    ];
+    const EXPLORERS = { 11155111: 'https://sepolia.etherscan.io', 84532: 'https://sepolia.basescan.org', 80002: 'https://amoy.polygonscan.com' };
+    let web3Config;
+    try { web3Config = JSON.parse(localStorage.getItem(WEB3_CONFIG_KEY)) || { chainId: 11155111, escrowAddress: '', tokenAddress: '', tokenDecimals: 6 }; }
+    catch { web3Config = { chainId: 11155111, escrowAddress: '', tokenAddress: '', tokenDecimals: 6 }; }
+    let authRecord;
+    try { authRecord = JSON.parse(localStorage.getItem(AUTH_KEY)); }
+    catch { authRecord = null; }
+    const chain = { provider: null, signer: null, escrow: null, token: null, account: '', chainId: 0 };
+    const demoState = {
+      contracts: [
+        { id: 'OC-2026-014', company: 'Constructora Andina S.A.', taxId: '1792483612001', project: 'Puente Río Verde', amount: 24800, deposited: 18600, paid: 12400, status: 'En ejecución', wallet: '0x71C...4A90' },
+        { id: 'OC-2026-013', company: 'Instalaciones del Pacífico', taxId: '0992816407001', project: 'Centro Logístico Norte', amount: 18600, deposited: 18600, paid: 9300, status: 'En ejecución', wallet: '0x98B...D210' },
+        { id: 'OC-2026-012', company: 'Vías y Cimientos Ltda.', taxId: '1791682405001', project: 'Acceso sector La Florida', amount: 32500, deposited: 32500, paid: 32500, status: 'Completado', wallet: '0x34F...82C1' },
+        { id: 'OC-2026-011', company: 'Electroobra Ecuador', taxId: '1793108276001', project: 'Estación de bombeo 04', amount: 12750, deposited: 6400, paid: 3200, status: 'Pendiente de fondeo', wallet: '0x2D1...A8F3' }
+      ],
+      milestones: [
+        { id: 'H-041', contractId: 'OC-2026-014', title: 'Cimentación de estribos', amount: 6200, condition: 'Acta de inspección aprobada', status: 'Pendiente de aprobación', approvals: 1 },
+        { id: 'H-040', contractId: 'OC-2026-014', title: 'Excavación y preparación', amount: 6200, condition: 'Registro fotográfico validado', status: 'Pagado', approvals: 3 },
+        { id: 'H-039', contractId: 'OC-2026-013', title: 'Montaje estructura principal', amount: 4650, condition: 'Inspección de obra aprobada', status: 'En revisión', approvals: 1 },
+        { id: 'H-038', contractId: 'OC-2026-013', title: 'Preparación de terreno', amount: 4650, condition: 'Entrega de informe técnico', status: 'Pagado', approvals: 3 },
+        { id: 'H-037', contractId: 'OC-2026-012', title: 'Pavimentación tramo norte', amount: 8100, condition: 'Control de calidad conforme', status: 'Pagado', approvals: 3 },
+        { id: 'H-036', contractId: 'OC-2026-011', title: 'Instalación de tableros', amount: 3200, condition: 'Prueba eléctrica certificada', status: 'Borrador', approvals: 0 }
+      ],
+      evidence: [
+        { name: 'cimentacion_estribo_02.jpg', contractId: 'OC-2026-014', milestoneId: 'H-041', date: '11 nov 2026 · 09:42', location: '-0.1807, -78.4678', hash: '8d1a2c4f...e739b102', size: '3.2 MB' },
+        { name: 'acta_inspeccion_fase1.pdf', contractId: 'OC-2026-013', milestoneId: 'H-039', date: '10 nov 2026 · 16:18', location: '-2.1709, -79.9224', hash: 'c4052e7b...83a8104e', size: '824 KB' },
+        { name: 'control_calidad_tramo.jpg', contractId: 'OC-2026-012', milestoneId: 'H-037', date: '09 nov 2026 · 11:06', location: '-0.2102, -78.4983', hash: '6a03d144...a032d09c', size: '2.7 MB' }
+      ],
+      logs: [
+        { time: '11 nov · 09:42', action: 'Evidencia registrada', detail: 'cimentacion_estribo_02.jpg · OC-2026-014', hash: '0x8bc4a1f2d904...7e13', type: 'Evidencia' },
+        { time: '11 nov · 09:16', action: 'Aprobación registrada', detail: 'Hito H-041 · 1 de 3 firmas', hash: '0x56fa1d8b7cc1...d9a2', type: 'Aprobación' },
+        { time: '10 nov · 16:18', action: 'Evidencia registrada', detail: 'acta_inspeccion_fase1.pdf · OC-2026-013', hash: '0x421cc7e102a6...8f31', type: 'Evidencia' },
+        { time: '10 nov · 14:31', action: 'Fondos depositados', detail: 'Escrow · OC-2026-013 · $4,650.00', hash: '0xa841b30c2dd1...5c09', type: 'Escrow' },
+        { time: '09 nov · 11:06', action: 'Pago ejecutado', detail: 'Hito H-037 · $8,100.00', hash: '0x99501ef47d22...fa10', type: 'Pago' }
+      ],
+      notifications: { email: true, whatsapp: false, milestone: true, payment: true, evidence: true }
+    };
+    let state;
+    try { state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || structuredClone(demoState); }
+    catch { state = structuredClone(demoState); }
+
+    const money = value => new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value || 0);
+    const formatAmount = (value, item) => item?.onchain ? `${new Intl.NumberFormat('es-EC', { maximumFractionDigits: web3Config.tokenDecimals }).format(value)} token` : money(value);
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+    const contractFor = id => state.contracts.find(contract => contract.id === id);
+    const statusClass = status => ({ 'Pendiente de aprobación': 'pending', 'En revisión': 'review', 'Pagado': 'paid', 'Completado': 'paid', 'En ejecución': 'paid', 'Pendiente de fondeo': 'pending', 'Borrador': 'draft' }[status] || 'draft');
+    function save() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+      catch { showToast('No se pudo guardar en este navegador.'); }
+    }
+    function saveWeb3Config() {
+      localStorage.setItem(WEB3_CONFIG_KEY, JSON.stringify(web3Config));
+    }
+    function updateWalletDisplay() {
+      const button = document.getElementById('wallet-button');
+      const address = chain.account ? `${chain.account.slice(0, 6)}…${chain.account.slice(-4)}` : 'Conectar MetaMask';
+      button.querySelector('span:last-child').textContent = address;
+      document.getElementById('network-name').textContent = chain.chainId ? `EVM · ${chain.chainId}` : 'Red de prueba';
+      document.getElementById('network-detail').innerHTML = chain.account ? `${address}<br>Escrow ${chain.escrow ? 'verificado' : 'no conectado'}` : 'Conecta una wallet para empezar<br>Contrato sin configurar';
+    }
+    function requireEvm() {
+      if (!chain.escrow || !chain.token) throw new Error('Configura el contrato y conecta MetaMask desde Blockchain antes de enviar transacciones.');
+    }
+    function transactionError(error) {
+      if (error?.code === 4001 || error?.code === 'ACTION_REJECTED') return 'La transacción fue cancelada en la wallet.';
+      return error?.shortMessage || error?.reason || error?.message || 'No se pudo completar la transacción.';
+    }
+    async function recordChainTransaction(action, detail, txHash) {
+      await addLog(action, detail, 'On-chain');
+      state.logs[0].txHash = txHash;
+    }
+    async function connectWallet() {
+      if (!window.ethereum) throw new Error('No se detectó una wallet EVM. Instala MetaMask y vuelve a cargar la página.');
+      if (!window.ethers) throw new Error('No se pudo cargar ethers.js. Comprueba la conexión a internet y recarga.');
+      if (!ethers.isAddress(web3Config.escrowAddress) || !ethers.isAddress(web3Config.tokenAddress)) {
+        switchView('blockchain');
+        throw new Error('Guarda primero las direcciones válidas del escrow y del token ERC-20.');
+      }
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send('eth_requestAccounts', []);
+      const network = await provider.getNetwork();
+      if (network.chainId !== BigInt(web3Config.chainId)) throw new Error(`MetaMask está en chain ID ${network.chainId}; cambia a ${web3Config.chainId} y vuelve a conectar.`);
+      const escrowCode = await provider.getCode(web3Config.escrowAddress);
+      const tokenCode = await provider.getCode(web3Config.tokenAddress);
+      if (escrowCode === '0x' || tokenCode === '0x') throw new Error('No se encontró bytecode en una de las direcciones configuradas para esta red.');
+      const signer = await provider.getSigner();
+      const escrow = new ethers.Contract(web3Config.escrowAddress, ESCROW_ABI, signer);
+      const onchainTokenAddress = await escrow.token();
+      if (onchainTokenAddress.toLowerCase() !== web3Config.tokenAddress.toLowerCase()) throw new Error('El token configurado no coincide con el token inmutable del escrow.');
+      const token = new ethers.Contract(web3Config.tokenAddress, TOKEN_ABI, signer);
+      const actualDecimals = Number(await token.decimals());
+      if (actualDecimals !== Number(web3Config.tokenDecimals)) throw new Error(`El token tiene ${actualDecimals} decimales; actualiza la configuración antes de operar.`);
+      chain.provider = provider;
+      chain.signer = signer;
+      chain.escrow = escrow;
+      chain.token = token;
+      chain.account = await signer.getAddress();
+      chain.chainId = Number(network.chainId);
+      updateWalletDisplay();
+      render();
+      showToast(`Wallet conectada en chain ID ${chain.chainId}. Revisa la red antes de firmar.`);
+    }
+    function encodeBytes(bytes) {
+      return btoa(String.fromCharCode(...new Uint8Array(bytes)));
+    }
+    function decodeBytes(value) {
+      return Uint8Array.from(atob(value), character => character.charCodeAt(0));
+    }
+    async function passwordDigest(password, salt) {
+      const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+      return crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, key, 256);
+    }
+    function enableAuthenticatedView() {
+      sessionStorage.setItem(AUTH_SESSION_KEY, 'active');
+      document.body.classList.add('authenticated');
+      const username = authRecord.username;
+      document.getElementById('account-name').textContent = username;
+      document.getElementById('account-avatar').textContent = username.slice(0, 2).toUpperCase();
+      updateWalletDisplay();
+      render();
+    }
+    function renderAuthScreen(error = '') {
+      const setup = !authRecord;
+      const wrap = document.getElementById('auth-form-wrap');
+      wrap.innerHTML = `<div class="auth-overline">GIAPESA S.A.C. · Acceso al sistema</div><h2>${setup ? 'Crear usuario administrador' : 'Iniciar sesión'}</h2><p class="auth-intro">${setup ? 'Configura el usuario y la contraseña de este navegador.' : 'Ingresa tus credenciales para entrar al panel de contratos.'}</p><form id="auth-form"><div class="auth-fields"><div class="auth-field"><label for="auth-username">Usuario</label><input id="auth-username" name="username" autocomplete="username" minlength="3" maxlength="40" required placeholder="Tu usuario"></div><div class="auth-field"><label for="auth-password">Contraseña</label><div class="auth-password"><input id="auth-password" name="password" type="password" autocomplete="${setup ? 'new-password' : 'current-password'}" minlength="10" required placeholder="${setup ? 'Mínimo 10 caracteres' : 'Tu contraseña'}"><button class="auth-show-password" type="button" id="toggle-password">Mostrar</button></div></div>${setup ? '<div class="auth-field"><label for="auth-confirm">Confirmar contraseña</label><input id="auth-confirm" name="confirm" type="password" autocomplete="new-password" minlength="10" required placeholder="Repite la contraseña"></div>' : ''}<div class="auth-error" id="auth-error" role="alert">${esc(error)}</div><button class="button auth-submit" type="submit">${setup ? 'Crear cuenta y entrar' : 'Acceder al sistema'}</button></div></form><div class="auth-notice">${setup ? 'La contraseña se guarda como hash en este navegador. Este modo local no sustituye un servidor de autenticación.' : 'Cuenta local de este navegador. Si olvidaste la contraseña, el prototipo no dispone de recuperación.'}</div><div class="auth-footer">Conexión cifrada según la configuración del sitio · GIAPESA S.A.C.</div>`;
+      document.getElementById('toggle-password').addEventListener('click', event => {
+        const input = document.getElementById('auth-password');
+        input.type = input.type === 'password' ? 'text' : 'password';
+        event.currentTarget.textContent = input.type === 'password' ? 'Mostrar' : 'Ocultar';
+      });
+      document.getElementById('auth-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const username = form.elements.username.value.trim();
+        const password = form.elements.password.value;
+        const submit = form.querySelector('[type="submit"]');
+        submit.disabled = true;
+        try {
+          if (!crypto?.subtle) throw new Error('El navegador requiere un contexto seguro para validar la contraseña. Abre la web en localhost o HTTPS.');
+          if (setup) {
+            if (username.length < 3) throw new Error('El usuario debe tener al menos 3 caracteres.');
+            if (password.length < 10) throw new Error('La contraseña debe tener al menos 10 caracteres.');
+            if (password !== form.elements.confirm.value) throw new Error('Las contraseñas no coinciden.');
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            const digest = await passwordDigest(password, salt);
+            authRecord = { username, usernameKey: username.toLocaleLowerCase('es'), salt: encodeBytes(salt), digest: encodeBytes(digest), iterations: 210000 };
+            localStorage.setItem(AUTH_KEY, JSON.stringify(authRecord));
+          } else {
+            if (username.toLocaleLowerCase('es') !== authRecord.usernameKey) throw new Error('Usuario o contraseña incorrectos.');
+            const digest = await passwordDigest(password, decodeBytes(authRecord.salt));
+            const expected = decodeBytes(authRecord.digest);
+            const actual = new Uint8Array(digest);
+            let difference = expected.length ^ actual.length;
+            for (let index = 0; index < Math.min(expected.length, actual.length); index++) difference |= expected[index] ^ actual[index];
+            if (difference !== 0) throw new Error('Usuario o contraseña incorrectos.');
+          }
+          enableAuthenticatedView();
+        } catch (authError) {
+          form.elements.password.value = '';
+          const errorElement = document.getElementById('auth-error');
+          if (errorElement) errorElement.textContent = authError.message || 'No se pudo validar el acceso.';
+          submit.disabled = false;
+        }
+      });
+    }
+    function initializeAuth() {
+      render();
+      if (authRecord && sessionStorage.getItem(AUTH_SESSION_KEY) === 'active') enableAuthenticatedView();
+      else {
+        sessionStorage.removeItem(AUTH_SESSION_KEY);
+        renderAuthScreen();
+      }
+    }
+    function logout() {
+      sessionStorage.removeItem(AUTH_SESSION_KEY);
+      chain.provider = null; chain.signer = null; chain.escrow = null; chain.token = null; chain.account = ''; chain.chainId = 0;
+      document.body.classList.remove('authenticated');
+      renderAuthScreen();
+    }
+    let toastTimer;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+    async function sha256(value) {
+      if (!window.crypto?.subtle) throw new Error('SHA-256 requiere un navegador en contexto seguro (HTTPS o archivo local).');
+      const bytes = typeof value === 'string' ? new TextEncoder().encode(value) : await value.arrayBuffer();
+      const digest = await crypto.subtle.digest('SHA-256', bytes);
+      return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+    async function addLog(action, detail, type) {
+      const previous = state.logs[0]?.hash || '0x00000000';
+      const fullHash = await sha256(`${previous}|${new Date().toISOString()}|${action}|${detail}`);
+      const shortHash = `0x${fullHash.slice(0, 12)}...${fullHash.slice(-4)}`;
+      const now = new Date();
+      state.logs.unshift({ time: `${now.toLocaleDateString('es-EC', { day: '2-digit', month: 'short' })} · ${now.toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' })}`, action, detail, hash: shortHash, fullHash, previous, type });
+    }
+    const header = (eyebrow, title, subtitle, action = '') => `<div class="page-heading"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p class="subtitle">${subtitle}</p></div>${action}</div>`;
+    function render() {
+      document.getElementById('contract-count').textContent = state.contracts.length;
+      document.getElementById('milestone-count').textContent = state.milestones.filter(item => ['Pendiente de aprobación', 'En revisión'].includes(item.status)).length;
+      const current = document.querySelector('.nav button.active')?.dataset.view || 'overview';
+      const names = { overview: 'Resumen', contracts: 'Contratos', milestones: 'Hitos', evidence: 'Evidencias', audit: 'Auditoría', security: 'Seguridad', blockchain: 'Blockchain', notifications: 'Avisos' };
+      document.getElementById('breadcrumb').textContent = names[current];
+      document.getElementById('content').innerHTML = views[current]();
+      bindViewEvents();
+    }
+    function contractTable(list = state.contracts) {
+      if (!list.length) return '<div class="empty-state">Aún no hay contratos registrados.</div>';
+      return `<div class="table-wrap"><table><thead><tr><th>Contrato / proyecto</th><th>Subcontratista</th><th>Monto</th><th>Estado</th><th></th></tr></thead><tbody>${list.map(contract => `<tr><td><div class="table-primary">${esc(contract.id)}</div><div class="table-secondary">${esc(contract.project)}</div></td><td><div class="table-primary">${esc(contract.company)}</div><div class="table-secondary">RUC ${esc(contract.taxId || 'No registrado')}</div></td><td>${formatAmount(contract.amount, contract)}</td><td><span class="status ${statusClass(contract.status)} dot">${esc(contract.status)}</span></td><td>${contract.onchain && !chain.escrow ? '<button class="text-button" data-view="blockchain">Conectar wallet</button>' : chain.escrow && !contract.chainKey ? '<span class="table-secondary">Solo demo</span>' : `<button class="text-button" data-deposit="${esc(contract.id)}">Fondear</button>`}</td></tr>`).join('')}</tbody></table></div>`;
+    }
+    function milestoneTable(list = state.milestones) {
+      if (!list.length) return '<div class="empty-state">No hay hitos. Crea uno para iniciar el seguimiento.</div>';
+      return `<div class="table-wrap"><table><thead><tr><th>Hito</th><th>Contrato</th><th>Monto</th><th>Firmas</th><th>Estado</th><th></th></tr></thead><tbody>${list.map(item => `<tr><td><div class="table-primary">${esc(item.title)}</div><div class="table-secondary">${esc(item.id)} · ${esc(item.condition)}</div></td><td>${esc(item.contractId)}</td><td>${formatAmount(item.amount, item)}</td><td>${item.approvals}/3</td><td><span class="status ${statusClass(item.status)} dot">${esc(item.status)}</span></td><td>${item.status === 'Pagado' ? '<span class="table-secondary">Ejecutado</span>' : item.onchain && !chain.escrow ? '<button class="text-button" data-view="blockchain">Conectar wallet</button>' : chain.escrow && item.chainMilestoneId == null ? '<span class="table-secondary">Solo demo</span>' : `<button class="text-button" data-approve="${esc(item.id)}">Revisar</button>`}</td></tr>`).join('')}</tbody></table></div>`;
+    }
+    const views = {
+      overview: () => {
+        const totalEscrow = state.contracts.reduce((sum, item) => sum + Math.max(0, item.deposited - item.paid), 0);
+        const open = state.contracts.filter(item => item.status !== 'Completado').length;
+        const pending = state.milestones.filter(item => ['Pendiente de aprobación', 'En revisión'].includes(item.status)).length;
+        const done = state.milestones.filter(item => item.status === 'Pagado').length;
+        return `${header('Martes, 11 de noviembre de 2026', 'Control de obra', 'Vista general de tus contratos y pagos verificables.', '<button class="button" data-modal="contract">＋ Nuevo contrato</button>')}
+          <div class="metric-grid">
+            <div class="metric"><div class="metric-head"><span>Contratos activos</span><span class="metric-mark">▤</span></div><div class="metric-value">${open}</div><div class="metric-foot"><span class="positive">${state.contracts.length}</span> registrados en total</div></div>
+            <div class="metric"><div class="metric-head"><span>Fondos en escrow</span><span class="metric-mark">◈</span></div><div class="metric-value">${money(totalEscrow)}</div><div class="metric-foot">Distribuidos en ${state.contracts.length} contratos</div></div>
+            <div class="metric"><div class="metric-head"><span>Hitos por aprobar</span><span class="metric-mark">◷</span></div><div class="metric-value">${pending}</div><div class="metric-foot"><span class="positive">${done} completados</span> con pago ejecutado</div></div>
+            <div class="metric"><div class="metric-head"><span>Evidencias verificadas</span><span class="metric-mark">⌑</span></div><div class="metric-value">${state.evidence.length}</div><div class="metric-foot"><span class="positive">SHA-256</span> con ubicación</div></div>
+          </div>
+          <div class="dashboard-grid">
+            <section class="panel"><div class="panel-head"><div><div class="panel-title">Contratos recientes</div><div class="panel-note">Seguimiento de subcontratos y compromisos</div></div><button class="text-button" data-view="contracts">Ver todos →</button></div>${contractTable(state.contracts.slice(0, 4))}</section>
+            <div class="right-stack">
+              <section class="panel escrow-panel"><div class="panel-head"><div><div class="panel-title">Balance escrow</div><div class="panel-note">Fondos reservados para hitos aprobados</div></div><span class="metric-mark" style="background:rgba(255,255,255,.13);color:#d3ef76">◈</span></div><div class="escrow-label">DISPONIBLE EN CONTRATOS</div><div class="escrow-value">${money(totalEscrow)}</div><div class="escrow-row"><span>Hitos ejecutados</span><span>${done} de ${state.milestones.length}</span></div><div class="progress"><span style="width:${state.milestones.length ? Math.round(done / state.milestones.length * 100) : 0}%"></span></div><div class="escrow-actions"><button class="button lime small" data-modal="deposit">＋ Depositar fondos</button><button class="button secondary small" data-view="audit">Ver movimientos</button></div></section>
+              <section class="panel"><div class="panel-head"><div><div class="panel-title">Actividad reciente</div><div class="panel-note">Eventos registrados en la bitácora</div></div><button class="text-button" data-view="audit">Auditoría →</button></div><div class="activity-list">${state.logs.slice(0, 4).map((log, index) => `<div class="activity"><div class="activity-icon">${['✓', '↗', '⌑', '◈'][index % 4]}</div><div class="activity-copy"><strong>${esc(log.action)}</strong><br>${esc(log.detail)}</div><div class="activity-time">${esc(log.time.split(' · ').pop())}</div></div>`).join('')}</div></section>
+            </div>
+          </div>
+          <div class="lower-grid"><section class="panel"><div class="panel-head"><div><div class="panel-title">Hitos que requieren atención</div><div class="panel-note">Validación multisig: se requieren 2 de 3 aprobaciones</div></div><button class="text-button" data-view="milestones">Abrir hitos →</button></div><div class="milestone-list">${state.milestones.filter(item => item.status !== 'Pagado').slice(0, 3).map((item, index) => `<div class="milestone"><div class="milestone-step">${String(index + 1).padStart(2, '0')}</div><div><div class="milestone-title">${esc(item.title)}</div><div class="milestone-meta">${esc(item.contractId)} · ${item.approvals}/3 firmas · ${esc(item.status)}</div></div><div class="milestone-amount">${money(item.amount)}</div></div>`).join('') || '<div class="empty-state">Todos los hitos están completados.</div>'}</div></section><section class="panel"><div class="panel-head"><div><div class="panel-title">Estado de servicio</div><div class="panel-note">Objetivos no funcionales</div></div><span class="status paid dot">Operativo</span></div><div class="assurance"><div class="assurance-line"><span>TLS 1.3 · HTTPS</span><span>ACTIVO</span></div><div class="assurance-line"><span>Disponibilidad objetivo</span><span>99.5%</span></div><div class="assurance-line"><span>Latencia API objetivo</span><span>&lt; 2 s</span></div><div class="assurance-line"><span>Trazabilidad</span><span>SHA-256</span></div></div></section></div>`;
+      },
+      contracts: () => `${header('Gestión contractual', 'Contratos', 'Subcontratos, montos y estado de los fondos en custodia.', '<button class="button" data-modal="contract">＋ Registrar contrato</button>')}<div class="panel"><div class="panel-head"><div><div class="panel-title">Registro de contratos</div><div class="panel-note">${state.contracts.length} acuerdos · montos expresados en USD</div></div><input class="search" id="contract-search" placeholder="Buscar por empresa o proyecto" aria-label="Buscar contratos"></div><div id="contract-table">${contractTable()}</div></div><div class="prototype-note">Los depósitos que ejecutes aquí solo actualizan esta demostración local; no se transfieren fondos reales.</div>`,
+      milestones: () => `${header('Ejecución y validación', 'Hitos de contrato', 'Condiciones parciales, evidencia y aprobación compartida.', '<button class="button" data-modal="milestone">＋ Nuevo hito</button>')}<div class="panel"><div class="panel-head"><div><div class="panel-title">Todos los hitos</div><div class="panel-note">Aprobación multisig de 2 entre 3 responsables</div></div><select class="filter-select" id="milestone-filter" aria-label="Filtrar hitos"><option value="Todos">Todos los estados</option><option>Pendiente de aprobación</option><option>En revisión</option><option>Pagado</option><option>Borrador</option></select></div><div id="milestone-table">${milestoneTable()}</div></div><div class="prototype-note">Al registrar la segunda aprobación se simula el pago automático del hito y se añade el evento a la bitácora.</div>`,
+      evidence: () => `${header('Prueba de avance', 'Evidencias', 'Archivos georreferenciados con huella SHA-256 verificable.', '<button class="button" data-modal="evidence">＋ Subir evidencia</button>')}<div class="section-summary"><span class="status paid dot">${state.evidence.length} evidencias</span><span>Hash calculado en este navegador · ubicación asociada al registro</span></div><div class="evidence-grid">${state.evidence.map(item => `<article class="evidence-card"><div class="evidence-thumb">⌑</div><div class="table-primary">${esc(item.name)}</div><div class="table-secondary">${esc(item.contractId)} · ${esc(item.milestoneId || 'Sin hito')}</div><div class="hash" title="${esc(item.fullHash || item.hash)}">SHA-256 · ${esc(item.hash)}</div><div class="table-secondary" style="margin-top:8px">⌖ ${esc(item.location || 'Ubicación no registrada')} · ${esc(item.date)}</div></article>`).join('') || '<div class="empty-state">Aún no hay evidencias registradas.</div>'}</div><div class="prototype-note">Los archivos permanecen en la memoria del navegador y no se envían a un servidor.</div>`,
+      audit: () => `${header('Registro de actividad', 'Auditoría', 'Historial encadenado de acciones, aprobaciones y transacciones.', '<button class="button secondary" data-export>↓ Exportar registro</button>')}<div class="panel"><div class="panel-head"><div><div class="panel-title">Bitácora de transacciones</div><div class="panel-note">Los registros on-chain incluyen enlace al explorador y hash de transacción.</div></div><span class="status paid dot">${state.logs.length} eventos</span></div>${state.logs.length ? state.logs.map(log => { const explorer = EXPLORERS[web3Config.chainId]; const txLink = log.txHash && explorer ? `<a href="${explorer}/tx/${esc(log.txHash)}" target="_blank" rel="noopener noreferrer">${esc(log.txHash.slice(0, 10))}… ↗</a>` : esc(log.txHash || log.hash); return `<div class="audit-row"><div class="audit-time">${esc(log.time)}</div><div><div class="table-primary">${esc(log.action)}</div><div class="table-secondary">${esc(log.detail)}</div></div><div class="audit-hash" title="${esc(log.fullHash || log.txHash || log.hash)}">${txLink}</div></div>`; }).join('') : '<div class="empty-state">No hay transacciones registradas.</div>'}</div><div class="prototype-note">Los recibos on-chain se verifican en el explorador. Los datos de negocio y archivos siguen almacenados localmente en este prototipo.</div>`,
+      security: () => `${header('Controles técnicos', 'Seguridad y servicio', 'Objetivos no funcionales del sistema solicitado.', '')}<div class="security-grid"><article class="security-card"><h3>Canal cifrado</h3><p>Comunicación cifrada de extremo a extremo con TLS 1.3.</p><div class="security-value">TLS 1.3</div><div class="security-foot">● Requisito: 100% de endpoints HTTPS</div></article><article class="security-card"><h3>Custodia de llaves</h3><p>Claves privadas gestionadas en módulo de seguridad de hardware.</p><div class="security-value">FIPS 140-2</div><div class="security-foot">● Nivel 3 · HSM requerido</div></article><article class="security-card"><h3>Tiempo de respuesta</h3><p>Objetivo para servicios REST, medido en percentil 95.</p><div class="security-value">&lt; 2 s</div><div class="security-foot">● Métrica objetivo P95</div></article><article class="security-card"><h3>Disponibilidad</h3><p>Objetivo mensual de disponibilidad del servicio.</p><div class="security-value">99.5%</div><div class="security-foot">● Requiere monitoreo de producción</div></article><article class="security-card"><h3>Escalabilidad</h3><p>Diseño objetivo para sesiones concurrentes.</p><div class="security-value">1,000</div><div class="security-foot">● Usuarios concurrentes</div></article><article class="security-card"><h3>Pruebas automatizadas</h3><p>Umbral mínimo de cobertura de pruebas unitarias.</p><div class="security-value">≥ 80%</div><div class="security-foot">● Pendiente de backend y suite de pruebas</div></article></div><div class="panel"><div class="panel-head"><div><div class="panel-title">Trazabilidad e integridad</div><div class="panel-note">Registro local encadenado para la demostración</div></div><span class="status review dot">Simulado</span></div><div class="setting-row"><div><div class="setting-name">Huella criptográfica de archivos</div><div class="setting-desc">SHA-256 se calcula localmente al subir evidencias.</div></div><span class="status paid">Activo</span></div><div class="setting-row"><div><div class="setting-name">Transacciones on-chain</div><div class="setting-desc">Requiere red blockchain, oráculo y contrato inteligente desplegado.</div></div><span class="status pending">Por integrar</span></div></div>`,
+      blockchain: () => `${header('Integración EVM', 'Conexión blockchain', 'Configura una red EVM de prueba y las direcciones del escrow ERC-20 desplegado.', '')}<div class="panel"><div class="panel-head"><div><div class="panel-title">Wallet y contrato</div><div class="panel-note">Solo se habilitan transacciones cuando coinciden red, contrato y token.</div></div><span class="status ${chain.escrow ? 'paid' : 'pending'} dot">${chain.escrow ? 'Conectado' : 'Sin conectar'}</span></div><form class="dialog-body" id="chain-config-form"><div class="form-grid"><div class="field"><label for="chain-id">Chain ID</label><input id="chain-id" name="chainId" type="number" min="1" required value="${esc(web3Config.chainId)}"><span class="field-hint">Sepolia: 11155111 · usa una testnet.</span></div><div class="field"><label for="token-decimals">Decimales del token</label><input id="token-decimals" name="tokenDecimals" type="number" min="0" max="18" required value="${esc(web3Config.tokenDecimals)}"></div><div class="field full"><label for="escrow-address">Dirección del contrato GiapesaEscrow</label><input id="escrow-address" name="escrowAddress" placeholder="0x…" value="${esc(web3Config.escrowAddress)}"></div><div class="field full"><label for="token-address">Dirección del token ERC-20 de prueba</label><input id="token-address" name="tokenAddress" placeholder="0x…" value="${esc(web3Config.tokenAddress)}"></div></div><div class="form-actions" style="justify-content:space-between"><button class="button secondary" id="wallet-connect-inline" type="button">Conectar MetaMask</button><button class="button" type="submit">Guardar configuración</button></div></form></div><div class="panel"><div class="panel-head"><div><div class="panel-title">Flujo de transacción</div><div class="panel-note">Las operaciones requieren confirmación explícita en la wallet.</div></div></div><div class="setting-row"><div><div class="setting-name">1. Registrar acuerdo y monto</div><div class="setting-desc">Crea un acuerdo en el contrato con la billetera del subcontratista.</div></div><span class="status review">EVM</span></div><div class="setting-row"><div><div class="setting-name">2. Fondear escrow</div><div class="setting-desc">Aprueba el gasto ERC-20 y deposita el token configurado.</div></div><span class="status review">ERC-20</span></div><div class="setting-row"><div><div class="setting-name">3. Evidencia y aprobación 2 de 3</div><div class="setting-desc">Ancla el hash SHA-256; la segunda firma libera el pago automáticamente.</div></div><span class="status review">On-chain</span></div></div><div class="prototype-note">Las direcciones de ejemplo no se admiten. Despliega primero el contrato de contracts/GiapesaEscrow.sol y usa un token de prueba; no conectes fondos de producción sin auditoría.</div>`,
+      notifications: () => `${header('Preferencias de comunicación', 'Avisos', 'Elige cómo recibir actualizaciones sobre la actividad contractual.', '<button class="button secondary" data-test-notice>Enviar aviso de prueba</button>')}<div class="panel"><div class="panel-head"><div><div class="panel-title">Canales</div><div class="panel-note">Configura los destinos de notificación del proyecto</div></div></div><div class="setting-row"><div><div class="setting-name">Correo electrónico</div><div class="setting-desc">Avisos a maria.cardenas@obraclara.ec</div></div><label class="switch"><input type="checkbox" data-notification="email" ${state.notifications.email ? 'checked' : ''}><span class="switch-track"></span></label></div><div class="setting-row"><div><div class="setting-name">WhatsApp</div><div class="setting-desc">Avisos al número registrado · +593 ••• •• 2841</div></div><label class="switch"><input type="checkbox" data-notification="whatsapp" ${state.notifications.whatsapp ? 'checked' : ''}><span class="switch-track"></span></label></div></div><div class="panel"><div class="panel-head"><div><div class="panel-title">Eventos</div><div class="panel-note">Actividad que genera un aviso</div></div></div><div class="setting-row"><div><div class="setting-name">Aprobación o rechazo de hitos</div><div class="setting-desc">Cambios de estado y firmas multisig recibidas.</div></div><label class="switch"><input type="checkbox" data-notification="milestone" ${state.notifications.milestone ? 'checked' : ''}><span class="switch-track"></span></label></div><div class="setting-row"><div><div class="setting-name">Pagos y depósitos</div><div class="setting-desc">Confirmación de depósitos en escrow y pagos de hitos.</div></div><label class="switch"><input type="checkbox" data-notification="payment" ${state.notifications.payment ? 'checked' : ''}><span class="switch-track"></span></label></div><div class="setting-row"><div><div class="setting-name">Nueva evidencia</div><div class="setting-desc">Archivos y documentación añadidos a un contrato.</div></div><label class="switch"><input type="checkbox" data-notification="evidence" ${state.notifications.evidence ? 'checked' : ''}><span class="switch-track"></span></label></div></div><div class="prototype-note">El envío real de correo o WhatsApp requiere configurar un servidor y proveedores externos. La prueba de aviso solo muestra una confirmación local.</div>`
+    };
+    function openModal(type, id) {
+      const modal = document.getElementById('modal');
+      const box = document.getElementById('modal-content');
+      if (type === 'contract') {
+        box.innerHTML = `<div class="dialog-head"><div><h2>Registrar subcontrato</h2><p>${chain.escrow ? 'Se enviará a la red conectada; MetaMask solicitará confirmación.' : 'Define las partes, el proyecto y el monto acordado.'}</p></div><button class="close-dialog" data-close aria-label="Cerrar">×</button></div><form class="dialog-body" id="contract-form"><div class="form-grid"><div class="field full"><label for="company">Razón social</label><input id="company" name="company" required placeholder="Nombre del subcontratista"></div><div class="field"><label for="taxId">RUC / identificación</label><input id="taxId" name="taxId" required pattern="[0-9]{10,13}" placeholder="13 dígitos"></div><div class="field"><label for="amount">Monto total (${chain.escrow ? 'unidades token' : 'USD'})</label><input id="amount" name="amount" type="number" min="0.000001" step="0.000001" required placeholder="0.00"></div><div class="field full"><label for="project">Proyecto / frente de obra</label><input id="project" name="project" required placeholder="Ej. Ampliación bloque B"></div><div class="field full"><label for="wallet">Billetera del subcontratista ${chain.escrow ? '' : '(opcional)'}</label><input id="wallet" name="wallet" ${chain.escrow ? 'required' : ''} placeholder="0x..."><span class="field-hint">${chain.escrow ? 'Dirección que recibirá los pagos del escrow.' : 'Necesaria para crear el acuerdo on-chain.'}</span></div></div><div class="form-actions"><button class="button secondary" type="button" data-close>Cancelar</button><button class="button" type="submit">${chain.escrow ? 'Enviar transacción' : 'Registrar contrato'}</button></div></form>`;
+      } else if (type === 'milestone') {
+        const options = state.contracts.filter(item => !chain.escrow || item.chainKey).map(item => `<option value="${esc(item.id)}">${esc(item.id)} · ${esc(item.project)}</option>`).join('');
+        box.innerHTML = `<div class="dialog-head"><div><h2>Definir hito</h2><p>${chain.escrow ? 'Selecciona un acuerdo de la cadena y confirma el envío en MetaMask.' : 'Vincula un pago parcial con una condición verificable.'}</p></div><button class="close-dialog" data-close aria-label="Cerrar">×</button></div><form class="dialog-body" id="milestone-form"><div class="form-grid"><div class="field full"><label for="milestone-contract">Contrato</label><select id="milestone-contract" name="contractId" required>${options}</select></div><div class="field full"><label for="milestone-title">Nombre del hito</label><input id="milestone-title" name="title" required placeholder="Ej. Instalación de estructura"></div><div class="field"><label for="milestone-amount">Monto parcial (${chain.escrow ? 'unidades token' : 'USD'})</label><input id="milestone-amount" name="amount" type="number" min="0.000001" step="0.000001" required placeholder="0.00"></div><div class="field"><label for="milestone-condition">Condición de pago</label><input id="milestone-condition" name="condition" required placeholder="Ej. Inspección aprobada"></div></div><div class="form-actions"><button class="button secondary" type="button" data-close>Cancelar</button><button class="button" type="submit">${chain.escrow ? 'Enviar transacción' : 'Crear hito'}</button></div></form>`;
+      } else if (type === 'deposit') {
+        const options = state.contracts.filter(item => !chain.escrow || item.chainKey).map(item => `<option value="${esc(item.id)}">${esc(item.id)} · ${esc(item.project)}</option>`).join('');
+        box.innerHTML = `<div class="dialog-head"><div><h2>Depositar en escrow</h2><p>${chain.escrow ? 'Autoriza el token ERC-20 y confirma el depósito en MetaMask.' : 'Registra un fondeo simulado para el contrato elegido.'}</p></div><button class="close-dialog" data-close aria-label="Cerrar">×</button></div><form class="dialog-body" id="deposit-form"><div class="form-grid"><div class="field full"><label for="deposit-contract">Contrato</label><select id="deposit-contract" name="contractId" required>${options}</select></div><div class="field full"><label for="deposit-amount">Monto a depositar (${chain.escrow ? 'unidades token' : 'USD'})</label><input id="deposit-amount" name="amount" type="number" min="0.000001" step="0.000001" required placeholder="0.00"></div></div>${chain.escrow ? '<p class="prototype-note" style="margin-top:14px">Se enviarán dos transacciones: autorización ERC-20 y depósito al escrow.</p>' : '<p class="prototype-note" style="margin-top:14px">Demostración: no se conecta a una billetera ni mueve dinero real.</p>'}<div class="form-actions"><button class="button secondary" type="button" data-close>Cancelar</button><button class="button" type="submit">${chain.escrow ? 'Autorizar y depositar' : 'Registrar depósito'}</button></div></form>`;
+      } else if (type === 'evidence') {
+        const contracts = state.contracts.filter(item => !chain.escrow || item.chainKey).map(item => `<option value="${esc(item.id)}">${esc(item.id)} · ${esc(item.project)}</option>`).join('');
+        const milestones = state.milestones.filter(item => !chain.escrow || item.chainMilestoneId != null).map(item => `<option value="${esc(item.id)}">${esc(item.id)} · ${esc(item.title)}</option>`).join('');
+        box.innerHTML = `<div class="dialog-head"><div><h2>Subir evidencia de obra</h2><p>${chain.escrow ? 'Se anclará el SHA-256 del archivo; ni el archivo ni las coordenadas GPS se publican.' : 'El archivo se procesa en el navegador; se calcula SHA-256 antes de guardarlo.'}</p></div><button class="close-dialog" data-close aria-label="Cerrar">×</button></div><form class="dialog-body" id="evidence-form"><div class="form-grid"><div class="field full"><label for="evidence-file">Fotografía o documento</label><input id="evidence-file" name="file" type="file" accept="image/*,.pdf" required><span class="field-hint">Máximo 15 MB. El archivo no se carga a ningún servidor.</span></div><div class="field"><label for="evidence-contract">Contrato</label><select id="evidence-contract" name="contractId" required>${contracts}</select></div><div class="field"><label for="evidence-milestone">Hito asociado</label><select id="evidence-milestone" name="milestoneId" ${chain.escrow ? 'required' : ''}>${chain.escrow ? '' : '<option value="">Sin hito</option>'}${milestones}</select></div><div class="field full"><label for="evidence-location">Coordenadas GPS</label><div style="display:flex;gap:8px"><input id="evidence-location" name="location" placeholder="Latitud, longitud"><button class="button secondary small" type="button" id="locate-button">⌖ Obtener</button></div><span class="field-hint">La ubicación se conserva localmente, no se escribe on-chain.</span></div></div><div class="form-actions"><button class="button secondary" type="button" data-close>Cancelar</button><button class="button" id="evidence-submit" type="submit">${chain.escrow ? 'Anclar hash en blockchain' : 'Calcular hash y guardar'}</button></div></form>`;
+      } else if (type === 'approval') {
+        const item = state.milestones.find(entry => entry.id === id);
+        if (!item) return;
+        const approvers = [{ name: 'Gestora de contratos', role: 'Aprobador 1', approved: item.chainMilestoneId != null ? Boolean((item.chainVotes || 0) & 1) : item.approvals >= 1 }, { name: 'Fiscalizador de obra', role: 'Aprobador 2', approved: item.chainMilestoneId != null ? Boolean((item.chainVotes || 0) & 2) : item.approvals >= 2 }, { name: 'Responsable de contabilidad', role: 'Aprobador 3', approved: item.chainMilestoneId != null ? Boolean((item.chainVotes || 0) & 4) : item.approvals >= 3 }];
+        box.innerHTML = `<div class="dialog-head"><div><h2>Aprobación multisig</h2><p>${esc(item.id)} · ${esc(item.title)} · ${formatAmount(item.amount, item)}</p></div><button class="close-dialog" data-close aria-label="Cerrar">×</button></div><div class="dialog-body"><div class="prototype-note">${item.chainMilestoneId != null ? 'Voto enviado a GiapesaEscrow; al segundo voto el contrato transfiere el ERC-20.' : 'Demostración local: la aprobación no mueve fondos.'} Se requieren 2 de 3 aprobadores.</div><div class="approval-list">${approvers.map(person => `<div class="approval-item ${person.approved ? 'approved' : ''}"><div><strong>${esc(person.name)}</strong><div class="table-secondary">${esc(person.role)}</div></div><span>${person.approved ? '✓ Aprobado' : 'Pendiente'}</span></div>`).join('')}</div><div class="approval-summary"><span>Firmas registradas</span><strong>${item.approvals} de 3 · ${item.approvals >= 2 ? 'Umbral alcanzado' : `Falta${item.approvals === 1 ? '' : 'n'} ${2 - item.approvals}`}</strong></div><div class="form-actions"><button class="button secondary" data-close>Cerrar</button>${item.approvals < 2 ? `<button class="button" data-sign="${esc(id)}">${item.chainMilestoneId != null ? 'Firmar en MetaMask' : `Aprobar como ${item.approvals === 0 ? 'María' : 'Jorge'}`}</button>` : ''}</div></div>`;
+      }
+      if (!modal.open) modal.showModal();
+    }
+    function closeModal() { document.getElementById('modal').close(); }
+    function switchView(name) {
+      const button = document.querySelector(`.nav button[data-view="${name}"]`);
+      if (!button) return;
+      document.querySelectorAll('.nav button').forEach(item => item.classList.toggle('active', item === button));
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function bindViewEvents() {
+      const search = document.getElementById('contract-search');
+      search?.addEventListener('input', () => {
+        const query = search.value.trim().toLocaleLowerCase('es');
+        const filtered = state.contracts.filter(item => `${item.id} ${item.company} ${item.project}`.toLocaleLowerCase('es').includes(query));
+        document.getElementById('contract-table').innerHTML = contractTable(filtered);
+      });
+      document.getElementById('milestone-filter')?.addEventListener('change', event => {
+        const filtered = event.target.value === 'Todos' ? state.milestones : state.milestones.filter(item => item.status === event.target.value);
+        document.getElementById('milestone-table').innerHTML = milestoneTable(filtered);
+      });
+      document.querySelectorAll('[data-notification]').forEach(input => input.addEventListener('change', () => {
+        state.notifications[input.dataset.notification] = input.checked;
+        save();
+        showToast('Preferencia de avisos actualizada.');
+      }));
+      document.getElementById('chain-config-form')?.addEventListener('submit', event => {
+        event.preventDefault();
+        const values = Object.fromEntries(new FormData(event.currentTarget));
+        const chainId = Number(values.chainId);
+        const decimals = Number(values.tokenDecimals);
+        if (!Number.isSafeInteger(chainId) || chainId < 1 || !Number.isInteger(decimals) || decimals < 0 || decimals > 18) {
+          showToast('Revisa el chain ID y los decimales del token.');
+          return;
+        }
+        if (!window.ethers?.isAddress(values.escrowAddress) || !window.ethers?.isAddress(values.tokenAddress)) {
+          showToast('Ingresa direcciones EVM válidas de escrow y token.');
+          return;
+        }
+        web3Config = { chainId, tokenDecimals: decimals, escrowAddress: values.escrowAddress, tokenAddress: values.tokenAddress };
+        saveWeb3Config();
+        chain.escrow = null; chain.token = null; chain.account = ''; chain.chainId = 0;
+        updateWalletDisplay();
+        render();
+        showToast('Configuración guardada. Conecta MetaMask para validar la red y el contrato.');
+      });
+      document.getElementById('wallet-connect-inline')?.addEventListener('click', async () => {
+        try { await connectWallet(); } catch (error) { showToast(transactionError(error)); }
+      });
+    }
+    document.addEventListener('click', async event => {
+      if (event.target.closest('#logout-button')) { logout(); return; }
+      if (event.target.closest('#wallet-button')) {
+        try { await connectWallet(); } catch (error) { showToast(transactionError(error)); }
+        return;
+      }
+      const nav = event.target.closest('[data-view]');
+      if (nav) { switchView(nav.dataset.view); return; }
+      const modalButton = event.target.closest('[data-modal]');
+      if (modalButton) { openModal(modalButton.dataset.modal); return; }
+      if (event.target.closest('[data-close]')) { closeModal(); return; }
+      const approval = event.target.closest('[data-approve]');
+      if (approval) {
+        const item = state.milestones.find(entry => entry.id === approval.dataset.approve);
+        if (item?.chainMilestoneId != null && chain.escrow) {
+          try {
+            const result = await chain.escrow.milestones(item.chainMilestoneId);
+            item.approvals = Number(result.approvals);
+            item.chainVotes = Number(result.votes);
+            item.status = result.paid ? 'Pagado' : item.status;
+          } catch (error) { showToast(transactionError(error)); return; }
+        }
+        openModal('approval', approval.dataset.approve);
+        return;
+      }
+      const sign = event.target.closest('[data-sign]');
+      if (sign) {
+        const item = state.milestones.find(entry => entry.id === sign.dataset.sign);
+        if (!item) return;
+        if (item.chainMilestoneId != null) {
+          try {
+            requireEvm();
+            const tx = await chain.escrow.approveMilestone(item.chainMilestoneId);
+            showToast('Transacción enviada. Esperando confirmación de la red…');
+            const receipt = await tx.wait();
+            const result = await chain.escrow.milestones(item.chainMilestoneId);
+            item.approvals = Number(result.approvals);
+            item.chainVotes = Number(result.votes);
+            item.status = result.paid ? 'Pagado' : 'Pendiente de aprobación';
+            if (result.paid) {
+              const contract = contractFor(item.contractId);
+              if (contract) contract.paid += item.amount;
+            }
+            await recordChainTransaction(result.paid ? 'Pago on-chain ejecutado' : 'Aprobación on-chain registrada', `${item.id} · ${item.approvals}/3 firmas · ${tx.hash}`, tx.hash);
+            closeModal(); save(); render();
+            showToast(result.paid ? `Hito pagado en cadena · bloque ${receipt.blockNumber}.` : `Firma confirmada en bloque ${receipt.blockNumber}; falta otra aprobación.`);
+          } catch (error) { showToast(transactionError(error)); }
+          return;
+        }
+        if (item.onchain) { showToast('Conecta la wallet y la red configuradas para votar este hito.'); return; }
+        if (chain.escrow) { showToast('Este hito es de demostración y no tiene ID on-chain.'); return; }
+        item.approvals++;
+        if (item.approvals >= 2) {
+          item.status = 'Pagado';
+          const contract = contractFor(item.contractId);
+          if (contract) contract.paid += item.amount;
+          await addLog('Pago automático ejecutado', `${item.id} · ${money(item.amount)} · ${item.contractId}`, 'Pago');
+          closeModal();
+          save(); render(); showToast('Segunda firma recibida. Pago del hito simulado y registrado.');
+        } else {
+          item.status = 'Pendiente de aprobación';
+          await addLog('Aprobación registrada', `${item.id} · ${item.approvals} de 3 firmas`, 'Aprobación');
+          save(); openModal('approval', item.id); showToast('Aprobación registrada. Se requiere una firma más.');
+        }
+        return;
+      }
+      const deposit = event.target.closest('[data-deposit]');
+      if (deposit) { openModal('deposit'); const select = document.getElementById('deposit-contract'); if (select) select.value = deposit.dataset.deposit; return; }
+      if (event.target.closest('[data-export]')) {
+        const file = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), records: state.logs }, null, 2)], { type: 'application/json' });
+        const anchor = document.createElement('a'); anchor.href = URL.createObjectURL(file); anchor.download = 'obra-clara-auditoria.json'; anchor.click(); URL.revokeObjectURL(anchor.href); showToast('Registro de auditoría exportado.'); return;
+      }
+      if (event.target.closest('[data-test-notice]')) {
+        const channels = [state.notifications.email && 'correo', state.notifications.whatsapp && 'WhatsApp'].filter(Boolean);
+        showToast(channels.length ? `Aviso de prueba preparado para ${channels.join(' y ')}. Envío real no configurado.` : 'Activa al menos un canal para preparar el aviso.'); return;
+      }
+      if (event.target.closest('#notification-button')) { switchView('notifications'); }
+      if (event.target.closest('#locate-button')) {
+        const input = document.getElementById('evidence-location');
+        if (!navigator.geolocation) { showToast('Geolocalización no disponible en este navegador.'); return; }
+        navigator.geolocation.getCurrentPosition(position => { input.value = `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`; }, () => showToast('No se pudo obtener ubicación. Revisa los permisos del navegador.'), { enableHighAccuracy: true, timeout: 10000 });
+      }
+    });
+    document.getElementById('modal').addEventListener('click', event => { if (event.target === event.currentTarget) closeModal(); });
+    document.getElementById('modal').addEventListener('submit', async event => {
+      event.preventDefault();
+      const form = event.target;
+      const data = Object.fromEntries(new FormData(form));
+      const submit = form.querySelector('[type="submit"]');
+      submit.disabled = true;
+      try {
+        if (form.id === 'contract-form') {
+          const id = `OC-2026-${String(15 + state.contracts.length - 4).padStart(3, '0')}`;
+          const amount = Number(data.amount);
+          let chainKey;
+          if (chain.escrow) {
+            requireEvm();
+            if (!ethers.isAddress(data.wallet)) throw new Error('Ingresa una billetera EVM válida para el subcontratista.');
+            chainKey = ethers.id(id);
+            const tx = await chain.escrow.createAgreement(chainKey, data.wallet, ethers.parseUnits(data.amount, web3Config.tokenDecimals));
+            const receipt = await tx.wait();
+            await recordChainTransaction('Acuerdo creado on-chain', `${id} · ${data.company} · ${tx.hash}`, tx.hash);
+            showToast(`Acuerdo confirmado en bloque ${receipt.blockNumber}.`);
+          } else {
+            await addLog('Contrato registrado', `${id} · ${data.company} · ${money(amount)}`, 'Contrato');
+          }
+          state.contracts.unshift({ id, company: data.company, taxId: data.taxId, project: data.project, amount, deposited: 0, paid: 0, status: 'Pendiente de fondeo', wallet: data.wallet || 'Por asignar', chainKey, onchain: Boolean(chainKey) });
+          closeModal(); save(); render();
+        } else if (form.id === 'milestone-form') {
+          const id = `H-${String(42 + state.milestones.length).padStart(3, '0')}`;
+          const amount = Number(data.amount);
+          const agreement = contractFor(data.contractId);
+          let chainMilestoneId;
+          if (chain.escrow) {
+            requireEvm();
+            if (!agreement?.chainKey) throw new Error('Elige un acuerdo creado en la cadena, no un registro de demostración.');
+            const tx = await chain.escrow.createMilestone(agreement.chainKey, ethers.parseUnits(data.amount, web3Config.tokenDecimals), data.title, data.condition);
+            const receipt = await tx.wait();
+            const event = receipt.logs.map(log => { try { return chain.escrow.interface.parseLog(log); } catch { return null; } }).find(log => log?.name === 'MilestoneCreated');
+            if (!event) throw new Error('La transacción confirmó, pero no se encontró el evento MilestoneCreated.');
+            chainMilestoneId = Number(event.args.milestoneId);
+            await recordChainTransaction('Hito creado on-chain', `${id} · ${data.contractId} · ${tx.hash}`, tx.hash);
+          } else {
+            await addLog('Hito definido', `${id} · ${data.contractId} · ${money(amount)}`, 'Hito');
+          }
+          state.milestones.unshift({ id, contractId: data.contractId, title: data.title, amount, condition: data.condition, status: 'Borrador', approvals: 0, chainMilestoneId, onchain: chainMilestoneId != null });
+          closeModal(); save(); render(); showToast(chainMilestoneId != null ? `Hito confirmado en la cadena · ID ${chainMilestoneId}.` : `Hito ${id} creado.`);
+        } else if (form.id === 'deposit-form') {
+          const contract = contractFor(data.contractId);
+          const amount = Number(data.amount);
+          if (contract?.onchain && !chain.escrow) throw new Error('Conecta la wallet y la red configuradas para fondear este acuerdo.');
+          if (chain.escrow) {
+            requireEvm();
+            if (!contract?.chainKey) throw new Error('Elige un acuerdo creado on-chain.');
+            if (contract.deposited + amount > contract.amount) throw new Error('El depósito supera el monto del acuerdo.');
+            const tokenAmount = ethers.parseUnits(data.amount, web3Config.tokenDecimals);
+            const approval = await chain.token.approve(web3Config.escrowAddress, tokenAmount);
+            await approval.wait();
+            const tx = await chain.escrow.deposit(contract.chainKey, tokenAmount);
+            const receipt = await tx.wait();
+            contract.deposited += amount;
+            if (contract.deposited >= contract.amount) contract.status = 'En ejecución';
+            await recordChainTransaction('Fondos depositados on-chain', `${contract.id} · ${data.amount} token · ${tx.hash}`, tx.hash);
+            closeModal(); save(); render(); showToast(`Depósito confirmado en bloque ${receipt.blockNumber}.`);
+            return;
+          }
+          if (!contract || contract.deposited + amount > contract.amount) throw new Error('El depósito supera el monto del contrato.');
+          contract.deposited += amount;
+          if (contract.deposited >= contract.amount) contract.status = 'En ejecución';
+          await addLog('Fondos depositados', `Escrow · ${contract.id} · ${money(amount)}`, 'Escrow');
+          closeModal(); save(); render(); showToast(`Depósito de ${money(amount)} registrado en la demo.`);
+        } else if (form.id === 'evidence-form') {
+          const file = form.elements.file.files[0];
+          if (!file) throw new Error('Selecciona un archivo.');
+          if (file.size > 15 * 1024 * 1024) throw new Error('El archivo supera el límite de 15 MB.');
+          submit.textContent = 'Calculando SHA-256…';
+          const fullHash = await sha256(file);
+          const now = new Date();
+          const linkedMilestone = state.milestones.find(item => item.id === data.milestoneId);
+          if (linkedMilestone?.onchain && !chain.escrow) throw new Error('Conecta la wallet y la red configuradas para anclar este hash.');
+          if (chain.escrow && data.milestoneId) {
+            requireEvm();
+            if (linkedMilestone?.chainMilestoneId == null) throw new Error('El hito seleccionado es de demostración; elige un hito on-chain.');
+            const tx = await chain.escrow.submitEvidence(linkedMilestone.chainMilestoneId, `0x${fullHash}`);
+            const receipt = await tx.wait();
+            await recordChainTransaction('Hash de evidencia anclado on-chain', `${file.name} · ${linkedMilestone.id} · ${tx.hash}`, tx.hash);
+            state.evidence.unshift({ name: file.name, contractId: data.contractId, milestoneId: data.milestoneId, date: `${now.toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' })} · ${now.toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' })}`, location: data.location || 'Sin ubicación', hash: `${fullHash.slice(0, 8)}...${fullHash.slice(-8)}`, fullHash, size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`, onchain: true, txHash: tx.hash });
+            closeModal(); save(); render(); showToast(`Hash anclado en bloque ${receipt.blockNumber}. El archivo sigue local; GPS no se publica.`);
+          } else {
+            state.evidence.unshift({ name: file.name, contractId: data.contractId, milestoneId: data.milestoneId, date: `${now.toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' })} · ${now.toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' })}`, location: data.location || 'Sin ubicación', hash: `${fullHash.slice(0, 8)}...${fullHash.slice(-8)}`, fullHash, size: `${(file.size / (1024 * 1024)).toFixed(1)} MB` });
+            await addLog('Evidencia registrada', `${file.name} · ${data.contractId} · SHA-256 ${fullHash.slice(0, 12)}…`, 'Evidencia');
+            closeModal(); save(); render(); showToast('Evidencia registrada y hash SHA-256 calculado.');
+          }
+        }
+      } catch (error) {
+        showToast(error.message || 'No se pudo completar la operación.');
+        submit.disabled = false;
+        submit.textContent = 'Intentar de nuevo';
+      }
+    });
+    document.querySelectorAll('.nav button').forEach(button => button.addEventListener('click', () => switchView(button.dataset.view)));
+    updateWalletDisplay();
+    if (window.ethereum?.on) {
+      window.ethereum.on('accountsChanged', () => window.location.reload());
+      window.ethereum.on('chainChanged', () => window.location.reload());
+    }
+    initializeAuth();
+  </script>
+</body>
+</html>
