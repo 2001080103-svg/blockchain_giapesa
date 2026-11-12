@@ -4,7 +4,7 @@ La aplicación puede enviar transacciones a una red EVM mediante una wallet inye
 
 ## Acceso al prototipo
 
-En el primer acceso se crea el usuario administrador local; después se ingresa con ese usuario y contraseña. La contraseña se guarda como hash PBKDF2 en el almacenamiento del navegador y la sesión dura mientras permanezca abierta esa pestaña. Este control no es autenticación multiusuario de servidor: los datos de negocio también están en el navegador. Para producción, reemplázalo por un backend con sesiones seguras, recuperación de cuenta, control de roles y almacenamiento protegido.
+La pantalla solicita únicamente el usuario y la contraseña que entrega GIAPESA; no permite crear cuentas ni contraseñas desde el sitio. Las cuentas antiguas ya guardadas en el navegador siguen siendo compatibles. En este prototipo, las credenciales se validan contra el almacenamiento local, por lo que un usuario recién provisionado no podrá iniciar sesión desde otro dispositivo hasta integrar un backend. Para producción, usa autenticación de servidor con sesiones seguras, recuperación de cuenta, control de roles y almacenamiento protegido.
 
 ## Despliegue de prueba
 

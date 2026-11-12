@@ -336,6 +336,7 @@
     const STORAGE_KEY = 'obra-clara-demo-v1';
     const WEB3_CONFIG_KEY = 'giapesa-evm-config-v1';
     const AUTH_KEY = 'giapesa-auth-user-v1';
+    const AUTH_USERS_KEY = 'giapesa-auth-users-v1';
     const AUTH_SESSION_KEY = 'giapesa-auth-session-v1';
     const ESCROW_ABI = [
       'function token() view returns (address)',
@@ -355,9 +356,16 @@
     let web3Config;
     try { web3Config = JSON.parse(localStorage.getItem(WEB3_CONFIG_KEY)) || { chainId: 11155111, escrowAddress: '', tokenAddress: '', tokenDecimals: 6 }; }
     catch { web3Config = { chainId: 11155111, escrowAddress: '', tokenAddress: '', tokenDecimals: 6 }; }
-    let authRecord;
-    try { authRecord = JSON.parse(localStorage.getItem(AUTH_KEY)); }
-    catch { authRecord = null; }
+    let authUsers = [];
+    try {
+      const savedUsers = JSON.parse(localStorage.getItem(AUTH_USERS_KEY));
+      if (Array.isArray(savedUsers)) authUsers = savedUsers;
+    } catch { authUsers = []; }
+    let legacyAuthRecord;
+    try { legacyAuthRecord = JSON.parse(localStorage.getItem(AUTH_KEY)); }
+    catch { legacyAuthRecord = null; }
+    if (!authUsers.length && legacyAuthRecord) authUsers = [legacyAuthRecord];
+    let authRecord = null;
     const chain = { provider: null, signer: null, escrow: null, token: null, account: '', chainId: 0 };
     const demoState = {
       contracts: [
@@ -464,18 +472,18 @@
       return crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, key, 256);
     }
     function enableAuthenticatedView() {
-      sessionStorage.setItem(AUTH_SESSION_KEY, 'active');
+      sessionStorage.setItem(AUTH_SESSION_KEY, authRecord.usernameKey);
       document.body.classList.add('authenticated');
-      const username = authRecord.username;
-      document.getElementById('account-name').textContent = username;
-      document.getElementById('account-avatar').textContent = username.slice(0, 2).toUpperCase();
+      const displayName = authRecord.companyName || authRecord.username;
+      document.getElementById('account-name').textContent = displayName;
+      document.getElementById('account-avatar').textContent = displayName.slice(0, 2).toUpperCase();
+      document.querySelector('.user-role').textContent = authRecord.role === 'subcontractor' ? 'Subcontratista' : 'Administrador';
       updateWalletDisplay();
       render();
     }
     function renderAuthScreen(error = '') {
-      const setup = !authRecord;
       const wrap = document.getElementById('auth-form-wrap');
-      wrap.innerHTML = `<div class="auth-overline">GIAPESA S.A.C. · Acceso al sistema</div><h2>${setup ? 'Crear usuario administrador' : 'Iniciar sesión'}</h2><p class="auth-intro">${setup ? 'Configura el usuario y la contraseña de este navegador.' : 'Ingresa tus credenciales para entrar al panel de contratos.'}</p><form id="auth-form"><div class="auth-fields"><div class="auth-field"><label for="auth-username">Usuario</label><input id="auth-username" name="username" autocomplete="username" minlength="3" maxlength="40" required placeholder="Tu usuario"></div><div class="auth-field"><label for="auth-password">Contraseña</label><div class="auth-password"><input id="auth-password" name="password" type="password" autocomplete="${setup ? 'new-password' : 'current-password'}" minlength="10" required placeholder="${setup ? 'Mínimo 10 caracteres' : 'Tu contraseña'}"><button class="auth-show-password" type="button" id="toggle-password">Mostrar</button></div></div>${setup ? '<div class="auth-field"><label for="auth-confirm">Confirmar contraseña</label><input id="auth-confirm" name="confirm" type="password" autocomplete="new-password" minlength="10" required placeholder="Repite la contraseña"></div>' : ''}<div class="auth-error" id="auth-error" role="alert">${esc(error)}</div><button class="button auth-submit" type="submit">${setup ? 'Crear cuenta y entrar' : 'Acceder al sistema'}</button></div></form><div class="auth-notice">${setup ? 'La contraseña se guarda como hash en este navegador. Este modo local no sustituye un servidor de autenticación.' : 'Cuenta local de este navegador. Si olvidaste la contraseña, el prototipo no dispone de recuperación.'}</div><div class="auth-footer">Conexión cifrada según la configuración del sitio · GIAPESA S.A.C.</div>`;
+      wrap.innerHTML = `<div class="auth-overline">GIAPESA S.A.C. · Acceso al sistema</div><h2>Iniciar sesión</h2><p class="auth-intro">Ingresa el usuario y la contraseña que te entregó GIAPESA S.A.C.</p><form id="auth-form"><div class="auth-fields"><div class="auth-field"><label for="auth-username">Usuario</label><input id="auth-username" name="username" autocomplete="username" maxlength="40" required placeholder="Tu usuario"></div><div class="auth-field"><label for="auth-password">Contraseña</label><div class="auth-password"><input id="auth-password" name="password" type="password" autocomplete="current-password" maxlength="128" required placeholder="Tu contraseña"><button class="auth-show-password" type="button" id="toggle-password">Mostrar</button></div></div><div class="auth-error" id="auth-error" role="alert">${esc(error)}</div><button class="button auth-submit" type="submit">Acceder al sistema</button></div></form><div class="auth-notice">Las credenciales las proporciona la empresa. Si aún no tienes usuario, solicítalo al área responsable de GIAPESA.</div><div class="auth-footer">Este prototipo valida cuentas guardadas en este navegador; el acceso corporativo compartido requiere un servidor de autenticación.</div>`;
       document.getElementById('toggle-password').addEventListener('click', event => {
         const input = document.getElementById('auth-password');
         input.type = input.type === 'password' ? 'text' : 'password';
@@ -486,27 +494,20 @@
         const form = event.currentTarget;
         const username = form.elements.username.value.trim();
         const password = form.elements.password.value;
+        const usernameKey = username.toLocaleLowerCase('es');
         const submit = form.querySelector('[type="submit"]');
         submit.disabled = true;
         try {
           if (!crypto?.subtle) throw new Error('El navegador requiere un contexto seguro para validar la contraseña. Abre la web en localhost o HTTPS.');
-          if (setup) {
-            if (username.length < 3) throw new Error('El usuario debe tener al menos 3 caracteres.');
-            if (password.length < 10) throw new Error('La contraseña debe tener al menos 10 caracteres.');
-            if (password !== form.elements.confirm.value) throw new Error('Las contraseñas no coinciden.');
-            const salt = crypto.getRandomValues(new Uint8Array(16));
-            const digest = await passwordDigest(password, salt);
-            authRecord = { username, usernameKey: username.toLocaleLowerCase('es'), salt: encodeBytes(salt), digest: encodeBytes(digest), iterations: 210000 };
-            localStorage.setItem(AUTH_KEY, JSON.stringify(authRecord));
-          } else {
-            if (username.toLocaleLowerCase('es') !== authRecord.usernameKey) throw new Error('Usuario o contraseña incorrectos.');
-            const digest = await passwordDigest(password, decodeBytes(authRecord.salt));
-            const expected = decodeBytes(authRecord.digest);
-            const actual = new Uint8Array(digest);
-            let difference = expected.length ^ actual.length;
-            for (let index = 0; index < Math.min(expected.length, actual.length); index++) difference |= expected[index] ^ actual[index];
-            if (difference !== 0) throw new Error('Usuario o contraseña incorrectos.');
-          }
+          const account = authUsers.find(user => user.usernameKey === usernameKey);
+          if (!account) throw new Error('No se encontró una cuenta provisionada en este navegador. Solicita el alta a GIAPESA.');
+          const digest = await passwordDigest(password, decodeBytes(account.salt));
+          const expected = decodeBytes(account.digest);
+          const actual = new Uint8Array(digest);
+          let difference = expected.length ^ actual.length;
+          for (let index = 0; index < Math.min(expected.length, actual.length); index++) difference |= expected[index] ^ actual[index];
+          if (difference !== 0) throw new Error('Usuario o contraseña incorrectos.');
+          authRecord = account;
           enableAuthenticatedView();
         } catch (authError) {
           form.elements.password.value = '';
@@ -518,7 +519,11 @@
     }
     function initializeAuth() {
       render();
-      if (authRecord && sessionStorage.getItem(AUTH_SESSION_KEY) === 'active') enableAuthenticatedView();
+      const sessionIdentity = sessionStorage.getItem(AUTH_SESSION_KEY);
+      if (sessionIdentity) {
+        authRecord = sessionIdentity === 'active' ? legacyAuthRecord : authUsers.find(user => user.usernameKey === sessionIdentity);
+      }
+      if (authRecord) enableAuthenticatedView();
       else {
         sessionStorage.removeItem(AUTH_SESSION_KEY);
         renderAuthScreen();
